@@ -1,12 +1,8 @@
-package services;
+package controllers;
 
 import lombok.AllArgsConstructor;
 import models.repositories.interfaces.IContractorRepository;
-import viewmodel.Action;
-import viewmodel.ViewModel;
-
-import java.util.LinkedList;
-import java.util.List;
+import view.ViewModel;
 
 @AllArgsConstructor
 public class ContractorController {

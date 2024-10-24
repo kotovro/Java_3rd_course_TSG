@@ -1,12 +1,13 @@
-package viewmodel.console;
+package applications;
 
-import services.RepositoryProvider;
-import viewmodel.*;
+import applications.IApplication;
+import services.ControllerService;
+import view.*;
 
 
 import java.util.List;
 import java.util.Scanner;
-import java.lang.reflect.*;
+
 public class ConsoleApplication implements IApplication {
 
     public static final String ANSI_RESET = "\u001B[0m";
@@ -21,21 +22,26 @@ public class ConsoleApplication implements IApplication {
 
     @Override
     public void start(Action action, ControllerService controllerService) {
+        ViewModel viewModel = null;
         while (action.getActionType() != Action.ActionType.EXIT)
         {
-            ViewModel viewModel = null;
-            try {
-                viewModel = controllerService.doAction(action);
-            } catch (InstantiationException e) {
-                throw new RuntimeException(e);
-            } catch (IllegalAccessException e) {
-                throw new RuntimeException(e);
-            } catch (NoSuchMethodException e) {
-                throw new RuntimeException(e);
-            } catch (InvocationTargetException e) {
-                throw new RuntimeException(e);
+
+            switch (action.getActionType())
+            {
+                case SHOW:
+                    try {
+                        viewModel = controllerService.doAction(action, null);
+                    } catch (RuntimeException e) {
+                        throw new RuntimeException(e);
+                    }
+                    action = display(viewModel);
+                    break;
+                case UPDATE:
+                    action = updateContext(viewModel);
+                    viewModel = controllerService.doAction(action, viewModel);
+                    action = viewModel.getActionsList().stream().filter(a -> a.getActionType() == Action.ActionType.SHOW).findFirst().get();
+                    break;
             }
-            display(viewModel);
         }
     }
 
@@ -59,18 +65,20 @@ public class ConsoleApplication implements IApplication {
         }
     }
 
-    private static void updateContext(ViewModel viewModel) {
+    private static Action updateContext(ViewModel viewModel) {
         Scanner scanner = new Scanner(System.in);
         for (ViewField field : viewModel.getParameters())
         {
             if (field.isChangeable())
             {
-                System.out.print("Enter new " + field.getAttributeName() + ": ");
+                System.out.print("Enter new " + field.getAttributeName() + "(empty to leave untouched): ");
                 String newFiledView = scanner.nextLine();
-                field.setAttributeValue(newFiledView);
+                if (newFiledView.length() > 0) {
+                    field.setAttributeValue(newFiledView);
+                }
             }
         }
-
+        return viewModel.getActionsList().stream().filter(a -> a.getActionType() == Action.ActionType.UPDATE).findFirst().get();
     }
     private static String getCommandNameByType(Action.ActionType action) {
         return switch (action)
@@ -87,7 +95,9 @@ public class ConsoleApplication implements IApplication {
         int i = 1;
         for (Action action: viewModel.getActionsList())
         {
-            System.out.print(Integer.toString(i) + ". " + getCommandNameByType(action.getActionType()) + " ");
+            if (action.isInteractive()) {
+                System.out.print(Integer.toString(i) + ". " + getCommandNameByType(action.getActionType()) + " ");
+            }
             i++;
         }
         System.out.println();
@@ -98,7 +108,7 @@ public class ConsoleApplication implements IApplication {
     }
 
 
-    private static void display(ViewModel viewModel) {
+    private static Action display(ViewModel viewModel) {
         Action action = null;
         while (action == null) {
             clearScreen();
@@ -112,6 +122,7 @@ public class ConsoleApplication implements IApplication {
 
             action = getNextAction(viewModel);
         }
+        return action;
     }
 
     private static Action getNextAction(ViewModel viewModel) {

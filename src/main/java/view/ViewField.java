@@ -1,4 +1,4 @@
-package viewmodel;
+package view;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

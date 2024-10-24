@@ -1,4 +1,4 @@
-package viewmodel;
+package view;
 
 
 import lombok.Getter;
@@ -19,4 +19,5 @@ public class Action {
     private String controller;
     private String action;
     private String parameter;
+    private boolean isInteractive = true;
 }

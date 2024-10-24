@@ -3,12 +3,11 @@ import models.repositories.interfaces.ICommentRepository;
 import models.repositories.interfaces.IRequestRepository;
 import models.repositories.interfaces.IResidentRepository;
 import services.RepositoryProvider;
-import services.RequestController;
-import viewmodel.Action;
-import viewmodel.ControllerService;
-import viewmodel.IApplication;
-import viewmodel.ViewModel;
-import viewmodel.console.ConsoleApplication;
+import controllers.RequestController;
+import view.Action;
+import services.ControllerService;
+import applications.IApplication;
+import applications.ConsoleApplication;
 
 import java.time.ZonedDateTime;
 
@@ -34,7 +33,7 @@ public class Main {
         IApplication application = new ConsoleApplication();
         Action action = new Action();
         action.setActionType(Action.ActionType.SHOW);
-        action.setController("services.RequestController");
+        action.setController("controllers.RequestController");
         action.setAction("fillView");
         action.setParameter("1");
         ControllerService controllerService = new ControllerService();
