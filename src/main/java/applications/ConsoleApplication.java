@@ -42,6 +42,7 @@ public class ConsoleApplication implements IApplication {
                     action = viewModel.getActionsList().stream().filter(a -> a.getActionType() == Action.ActionType.SHOW).findFirst().get();
                     break;
             }
+
         }
     }
 
@@ -89,6 +90,7 @@ public class ConsoleApplication implements IApplication {
             case EXIT -> "Exit";
             case RETURN -> "Return";
             case SHOW -> "";
+            case BACK -> "Back to list";
         };
     }
     private static void showCommands(ViewModel viewModel) {
@@ -96,7 +98,10 @@ public class ConsoleApplication implements IApplication {
         for (Action action: viewModel.getActionsList())
         {
             if (action.isInteractive()) {
-                System.out.print(Integer.toString(i) + ". " + getCommandNameByType(action.getActionType()) + " ");
+                String actionName = action.getActionName() != null  && action.getActionName().length() > 0
+                        ? action.getActionName()
+                        : getCommandNameByType(action.getActionType()) + " ";
+                System.out.print(Integer.toString(i) + ". " + actionName);
             }
             i++;
         }

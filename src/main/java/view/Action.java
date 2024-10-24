@@ -13,11 +13,13 @@ public class Action {
         DELETE,
         RETURN,
         SHOW,
-        EXIT
+        EXIT,
+        BACK
     }
     private ActionType actionType;
     private String controller;
     private String action;
     private String parameter;
     private boolean isInteractive = true;
+    private String actionName;
 }

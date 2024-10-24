@@ -52,7 +52,7 @@ public class RequestController implements IController {
 
 
 
-        List<ViewField> parameters = new LinkedList<>();
+        List<ViewField> parameters = requestMdlView.getParameters();
         parameters.add(new ViewField("Request Id", requestIdStr, false, false));
         parameters.add(new ViewField("Description", request.getDescription(), true, true));
         parameters.add(new ViewField("Author Id", Integer.toString(request.getAuthorId()), true, false));
@@ -62,9 +62,8 @@ public class RequestController implements IController {
         parameters.add(new ViewField("Type", request.getType().toString(), true, true));
         parameters.add(new ViewField("Status", request.getState().toString(), true, true));
         parameters.add(new ViewField("Date", request.getTime().toString(), false, true));
-        requestMdlView.setParameters(parameters);
 
-        List<Action> commands = new LinkedList<>();
+        List<Action> commands = requestMdlView.getActionsList();
         Action update = new Action();
         update.setActionType(Action.ActionType.UPDATE);
         update.setController("controllers.RequestController");
@@ -90,10 +89,37 @@ public class RequestController implements IController {
         show.setAction("fillView");
         show.setInteractive(false);
         commands.add(show);
-        requestMdlView.setActionsList(commands);
+        Action back = new Action();
+        back.setActionName("Back to requests list");
+        back.setActionType(Action.ActionType.SHOW);
+        back.setController("controllers.RequestController");
+        back.setParameter("");
+        back.setAction("getList");
+        back.setInteractive(true);
+        commands.add(back);
         return requestMdlView;
     }
 
+    public ViewModel getList(String param) {
+        ViewModel viewModel = new ViewModel();
+        viewModel.setTitle("Requests list");
+        IRequestRepository rep = repositoryProvider.getRequestRepository();
+        List<Request> reqList = rep.getRequestList();
+        for (Request request : reqList)
+        {
+            Action action = new Action();
+            action.setActionName("Request " + request.getRequestId() + "\n");
+            action.setActionType(Action.ActionType.SHOW);
+            action.setController("controllers.RequestController");
+            action.setAction("fillView");
+            action.setParameter(Integer.toString(request.getRequestId()));
+            viewModel.getActionsList().add(action);
+        }
+        Action action = new Action();
+        action.setActionType(Action.ActionType.EXIT);
+        viewModel.getActionsList().add(action);
+        return viewModel;
+    }
     public ViewModel update(ViewModel viewModel) {
         int id = Integer.parseInt(
                 viewModel.getParameters()
