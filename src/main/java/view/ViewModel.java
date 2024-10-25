@@ -14,4 +14,8 @@ public class ViewModel  {
     private List<Action> actionsList = new LinkedList<>();
     @Setter
     private String errorMessage;
+
+    public void addCommand(Action action) {
+        actionsList.add(action);
+    }
 }

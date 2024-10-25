@@ -41,8 +41,7 @@ public class ConsoleApplication implements IApplication {
                     action = updateContext(viewModel);
                     viewModel = controllerService.doAction(action, viewModel);
 //                    DEFINITELY RESOLVE SHOW COMMAND DEPENDENCY!
-                    List<Action> actions = viewModel.getActionsList().stream().filter(a -> a.getActionType() == Action.ActionType.SHOW).collect(Collectors.toList());
-                    action = actions.get(actions.size() - 1);
+                    action = action.getOnSuccess();
                     break;
             }
 

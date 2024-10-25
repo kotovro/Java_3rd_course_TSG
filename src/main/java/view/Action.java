@@ -19,6 +19,8 @@ public class Action {
     private ActionType actionType;
     private String controller;
     private String action;
+    private Action onSuccess;
+    private Action onError;
     private String parameter;
     private boolean isInteractive = true;
     private String actionName;

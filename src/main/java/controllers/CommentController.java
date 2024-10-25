@@ -77,11 +77,6 @@ public class CommentController implements IController {
         delete.setActionType(Action.ActionType.DELETE);
         commands.add(delete);
 
-
-        Action exit = new Action();
-        exit.setActionType(Action.ActionType.EXIT);
-        commands.add(exit);
-
         Action back = new Action();
         back.setActionName("Back to request");
         back.setActionType(Action.ActionType.SHOW);
@@ -96,6 +91,11 @@ public class CommentController implements IController {
         showComments.setActionType(Action.ActionType.SHOW);
         showComments.setController("controllers.CommentController");
         showComments.setAction("getList");
+
+
+        Action exit = new Action();
+        exit.setActionType(Action.ActionType.EXIT);
+        commands.add(exit);
 
         Action show = new Action();
         show.setActionType(Action.ActionType.SHOW);
@@ -113,19 +113,30 @@ public class CommentController implements IController {
         viewModel.setTitle("Comments list");
         ICommentRepository rep = repositoryProvider.getCommentRepository();
         List<Comment> reqList = rep.getCommentToRequest(Integer.parseInt(requestId));
+
+        IResidentRepository residentRep = repositoryProvider.getResidentRepository();
+        IStaffMemberRepository staffRep = repositoryProvider.getStaffMemberRepository();
         for (Comment comment : reqList)
         {
-            Action action = new Action();
-            action.setActionName("Comment " + comment.getCommentId() + "\n");
-            action.setActionType(Action.ActionType.SHOW);
-            action.setController("controllers.CommentController");
-            action.setAction("fillView");
-            action.setParameter(Integer.toString(comment.getCommentId()));
-            viewModel.getActionsList().add(action);
+            String authorName = staffRep.getNameByUserId(comment.getAuthorId()) == null
+                    ? staffRep.getNameByUserId(comment.getAuthorId())
+                    : residentRep.getNameByUserId(comment.getAuthorId());
+            String commentMetaData = authorName + " " + comment.getTime().toString();
+            ViewField field = new ViewField(commentMetaData, comment.getBody(), false, true);
+            viewModel.getParameters().add(field);
         }
-        Action action = new Action();
-        action.setActionType(Action.ActionType.EXIT);
-        viewModel.getActionsList().add(action);
+
+        Action back = new Action();
+        back.setActionName("Back to request");
+        back.setActionType(Action.ActionType.SHOW);
+        back.setController("controllers.RequestController");
+        back.setAction("fillView");
+        back.setParameter(requestId);
+        viewModel.addCommand(back);
+
+        Action exit = new Action();
+        exit.setActionType(Action.ActionType.EXIT);
+        viewModel.addCommand(exit);
         return viewModel;
     }
 
