@@ -70,18 +70,38 @@ public class RequestController implements IController {
         update.setAction("update");
         update.setParameter(Integer.toString(requestId));
         commands.add(update);
+
         Action add = new Action();
         add.setActionType(Action.ActionType.ADD);
         update.setController("controllers.RequestController");
         update.setAction("update");
         update.setParameter("-1");
-        Action delete = new Action();
         commands.add(add);
+
+        Action delete = new Action();
         delete.setActionType(Action.ActionType.DELETE);
-        Action exit = new Action();
         commands.add(delete);
+
+        Action exit = new Action();
         exit.setActionType(Action.ActionType.EXIT);
         commands.add(exit);
+
+        Action back = new Action();
+        back.setActionName("Back to requests list");
+        back.setActionType(Action.ActionType.SHOW);
+        back.setController("controllers.RequestController");
+        back.setParameter("");
+        back.setAction("getList");
+        commands.add(back);
+
+        Action showComments = new Action();
+        showComments.setActionName("Show comments to request");
+        showComments.setActionType(Action.ActionType.SHOW);
+        showComments.setParameter(requestIdStr);
+        showComments.setController("controllers.CommentController");
+        showComments.setAction("getList");
+        commands.add(showComments);
+
         Action show = new Action();
         show.setActionType(Action.ActionType.SHOW);
         show.setController("controllers.RequestController");
@@ -89,14 +109,8 @@ public class RequestController implements IController {
         show.setAction("fillView");
         show.setInteractive(false);
         commands.add(show);
-        Action back = new Action();
-        back.setActionName("Back to requests list");
-        back.setActionType(Action.ActionType.SHOW);
-        back.setController("controllers.RequestController");
-        back.setParameter("");
-        back.setAction("getList");
-        back.setInteractive(true);
-        commands.add(back);
+
+
         return requestMdlView;
     }
 

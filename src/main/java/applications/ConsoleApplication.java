@@ -7,6 +7,7 @@ import view.*;
 
 import java.util.List;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 public class ConsoleApplication implements IApplication {
 
@@ -39,7 +40,9 @@ public class ConsoleApplication implements IApplication {
                 case UPDATE:
                     action = updateContext(viewModel);
                     viewModel = controllerService.doAction(action, viewModel);
-                    action = viewModel.getActionsList().stream().filter(a -> a.getActionType() == Action.ActionType.SHOW).findFirst().get();
+//                    DEFINITELY RESOLVE SHOW COMMAND DEPENDENCY!
+                    List<Action> actions = viewModel.getActionsList().stream().filter(a -> a.getActionType() == Action.ActionType.SHOW).collect(Collectors.toList());
+                    action = actions.get(actions.size() - 1);
                     break;
             }
 
@@ -101,7 +104,7 @@ public class ConsoleApplication implements IApplication {
                 String actionName = action.getActionName() != null  && action.getActionName().length() > 0
                         ? action.getActionName()
                         : getCommandNameByType(action.getActionType()) + " ";
-                System.out.print(Integer.toString(i) + ". " + actionName);
+                System.out.print(Integer.toString(i) + ". " + actionName + " ");
             }
             i++;
         }

@@ -15,6 +15,8 @@ public class Main {
     private static void fillRepositoriesWithTestData(RepositoryProvider repProvider){
 
         ICommentRepository commentRepository =  repProvider.getCommentRepository();
+        commentRepository.add(new Comment(1, 1, 1, "s", ZonedDateTime.now(), "NOPE"));
+
         IResidentRepository residentRepository = repProvider.getResidentRepository();
         residentRepository.add(new Resident(1, 1, "Saaas", "Sooos", true, "19A", "Test"));
         IRequestRepository requestRepository = repProvider.getRequestRepository();
@@ -34,8 +36,8 @@ public class Main {
         Action action = new Action();
         action.setActionType(Action.ActionType.SHOW);
         action.setController("controllers.RequestController");
-        action.setAction("fillView");
-        action.setParameter("1");
+        action.setAction("getList");
+        action.setParameter("");
         ControllerService controllerService = new ControllerService();
         application.start(action, controllerService);
 
