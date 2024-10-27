@@ -1,6 +1,6 @@
-package services;
+package controller;
 
-import controllers.IController;
+import services.IService;
 import view.Action;
 import view.ViewModel;
 
@@ -11,16 +11,20 @@ public class ControllerService {
         Class<?> c = null;
         Method m = null;
 
+        String route = action.getRoute();
+        String controllerName = getControllerFromRoute(route);
+        String actionName = getActionFromRoute(route);
         Class paramClass = viewModel == null ? String.class : ViewModel.class;
         Object parameter = viewModel == null ? action.getParameter() : viewModel;
 
         try {
-            c = Class.forName(action.getController());
 
-            IController controller = (IController) c.getDeclaredConstructor().newInstance();
+            c = Class.forName(controllerName);
+
+            IService controller = (IService) c.getDeclaredConstructor().newInstance();
             controller.setRepositoryProvider(RepositoryProvider.getInstance());
 
-            m = c.getMethod(action.getAction(), paramClass);
+            m = c.getMethod(actionName, paramClass);
 
             viewModel = (ViewModel) m.invoke(controller, parameter);
         } catch (Exception e) {
@@ -28,4 +32,13 @@ public class ControllerService {
         }
         return viewModel;
     }
+
+    private String getControllerFromRoute(String route) {
+        return  route.split("/")[0];
+    }
+
+    private String getActionFromRoute(String route) {
+        return  route.split("/")[1];
+    }
+
 }

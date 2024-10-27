@@ -1,13 +1,11 @@
 package applications;
 
-import applications.IApplication;
-import services.ControllerService;
+import controller.ControllerService;
 import view.*;
 
 
 import java.util.List;
 import java.util.Scanner;
-import java.util.stream.Collectors;
 
 public class ConsoleApplication implements IApplication {
 
@@ -43,6 +41,10 @@ public class ConsoleApplication implements IApplication {
 //                    DEFINITELY RESOLVE SHOW COMMAND DEPENDENCY!
                     action = action.getOnSuccess();
                     break;
+                case DELETE:
+//                    action = deleteContext();
+                    break;
+
             }
 
         }

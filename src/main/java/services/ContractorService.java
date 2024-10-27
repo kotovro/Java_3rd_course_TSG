@@ -1,14 +1,14 @@
-package controllers;
+package services;
 
 import lombok.AllArgsConstructor;
 import models.repositories.interfaces.IContractorRepository;
 import view.ViewModel;
 
 @AllArgsConstructor
-public class ContractorController {
+public class ContractorService {
     private IContractorRepository contractorRep;
 
-//    public ContractorController(RepositoryProvider repProvider){
+//    public ContractorService(RepositoryProvider repProvider){
 //    }
 
 

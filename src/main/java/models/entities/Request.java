@@ -20,6 +20,7 @@ public class Request {
     private int authorId;
     private int residentId;
     private ZonedDateTime time;
+    private boolean isDeleted;
 
 
     public void updateFromObject(Request request) {

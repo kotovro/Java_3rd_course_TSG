@@ -1,6 +1,6 @@
 package applications;
 
-import services.ControllerService;
+import controller.ControllerService;
 import view.Action;
 
 public interface IApplication {

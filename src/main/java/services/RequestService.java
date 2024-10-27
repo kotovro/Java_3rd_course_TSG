@@ -1,4 +1,4 @@
-package controllers;
+package services;
 
 
 import lombok.Setter;
@@ -8,15 +8,14 @@ import models.entities.RequestType;
 import models.repositories.interfaces.IRequestRepository;
 import models.repositories.interfaces.IResidentRepository;
 import models.repositories.interfaces.IStaffMemberRepository;
-import services.RepositoryProvider;
-import view.Action;
+import controller.RepositoryProvider;
 import view.ViewField;
 import view.ViewModel;
 
 import java.util.List;
 
-@RequestService
-public class RequestController implements IController {
+@Controller(name = "request")
+public class RequestService implements IService {
 
     @Setter
     RepositoryProvider repositoryProvider;
@@ -25,7 +24,7 @@ public class RequestController implements IController {
 //    public Re
 
 
-    @ShowRequest
+    @Action(name = "show")
     public ViewModel fillView(String requestIdStr) {
         int requestId = Integer.parseInt(requestIdStr);
         ViewModel requestMdlView = new ViewModel();
@@ -61,58 +60,63 @@ public class RequestController implements IController {
         parameters.add(new ViewField("Date", request.getTime().toString(), false, true));
 
 
-        Action show = new Action();
+        view.Action show = new view.Action();
 
-        Action update = new Action();
-        update.setActionType(Action.ActionType.UPDATE);
-        update.setController("controllers.RequestController");
-        update.setAction("update");
+        view.Action update = new view.Action();
+        update.setActionType(view.Action.ActionType.UPDATE);
+        update.setRoute("services.RequestService/update");
         update.setOnSuccess(show);
         update.setOnError(show);
         update.setParameter(Integer.toString(requestId));
         requestMdlView.addCommand(update);
 
-        Action add = new Action();
-        add.setActionType(Action.ActionType.ADD);
-        add.setController("controllers.RequestController");
-        add.setAction("update");
+        view.Action add = new view.Action();
+        add.setActionType(view.Action.ActionType.UPDATE);
+        add.setRoute("services.RequestService/update");
+        add.setActionName("Add new");
         add.setParameter("-1");
         requestMdlView.addCommand(add);
 
-        Action delete = new Action();
-        delete.setActionType(Action.ActionType.DELETE);
+        view.Action delete = new view.Action();
+        delete.setActionType(view.Action.ActionType.DELETE);
+//        delete.setOnSuccess("");
         requestMdlView.addCommand(delete);
 
-        Action showComments = new Action();
+        view.Action showComments = new view.Action();
         showComments.setActionName("Show comments to request");
-        showComments.setActionType(Action.ActionType.SHOW);
+        showComments.setActionType(view.Action.ActionType.SHOW);
         showComments.setParameter(requestIdStr);
-        showComments.setController("controllers.CommentController");
-        showComments.setAction("getList");
+        showComments.setRoute("services.CommentService/getList");
         requestMdlView.addCommand(showComments);
 
-        Action back = new Action();
+        view.Action back = new view.Action();
         back.setActionName("Back to requests list");
-        back.setActionType(Action.ActionType.SHOW);
-        back.setController("controllers.RequestController");
+        back.setActionType(view.Action.ActionType.SHOW);
+        back.setRoute("services.RequestService/getList");
         back.setParameter("");
-        back.setAction("getList");
         requestMdlView.addCommand(back);
 
-        Action exit = new Action();
-        exit.setActionType(Action.ActionType.EXIT);
+        view.Action exit = new view.Action();
+        exit.setActionType(view.Action.ActionType.EXIT);
         requestMdlView.addCommand(exit);
 
-        show.setActionType(Action.ActionType.SHOW);
-        show.setController("controllers.RequestController");
+        show.setActionType(view.Action.ActionType.SHOW);
+        show.setRoute("services.RequestService/fillView");
         show.setParameter(Integer.toString(requestId));
-        show.setAction("fillView");
         show.setInteractive(false);
         requestMdlView.addCommand(show);
+
+        view.Action addComment = new view.Action();
+        addComment.setActionName("Add comment to request");
+        addComment.setActionType(view.Action.ActionType.UPDATE);
+        addComment.setParameter("-1");
+        addComment.setRoute("services.CommentService/update");
+        requestMdlView.addCommand(addComment);
 
         return requestMdlView;
     }
 
+    @Action(name = "showAll")
     public ViewModel getList(String param) {
         ViewModel viewModel = new ViewModel();
         viewModel.setTitle("Requests list");
@@ -120,19 +124,20 @@ public class RequestController implements IController {
         List<Request> reqList = rep.getRequestList();
         for (Request request : reqList)
         {
-            Action action = new Action();
+            view.Action action = new view.Action();
             action.setActionName("Request " + request.getRequestId() + "\n");
-            action.setActionType(Action.ActionType.SHOW);
-            action.setController("controllers.RequestController");
-            action.setAction("fillView");
+            action.setActionType(view.Action.ActionType.SHOW);
+            action.setRoute("services.RequestService/fillView");
             action.setParameter(Integer.toString(request.getRequestId()));
             viewModel.getActionsList().add(action);
         }
-        Action exit = new Action();
-        exit.setActionType(Action.ActionType.EXIT);
+        view.Action exit = new view.Action();
+        exit.setActionType(view.Action.ActionType.EXIT);
         viewModel.getActionsList().add(exit);
         return viewModel;
     }
+
+    @Action(name = "update")
     public ViewModel update(ViewModel viewModel) {
         int id = Integer.parseInt(
                 viewModel.getParameters()
@@ -163,7 +168,6 @@ public class RequestController implements IController {
                         .findFirst()
                         .get()
                         .getAttributeValue()));
-
         req.setType(RequestType.valueOf(
                 viewModel.getParameters()
                         .stream()
@@ -188,5 +192,6 @@ public class RequestController implements IController {
         rep.updateRequest(req);
         return viewModel;
     }
+
 }
 

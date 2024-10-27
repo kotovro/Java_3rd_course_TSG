@@ -28,8 +28,13 @@ public class CommentRepositoryInMemory implements ICommentRepository {
 
     @Override
     public void updateComment(Comment comment) {
-        Comment temp = getCommentById(comment.getCommentId());
-        temp.updateFromObject(comment);
+        if (comment.getCommentId() == -1)
+        {
+            add(comment);
+        } else {
+            Comment temp = getCommentById(comment.getCommentId());
+            temp.updateFromObject(comment);
+        }
     }
 
     @Override
