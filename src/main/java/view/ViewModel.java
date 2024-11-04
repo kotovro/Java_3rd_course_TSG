@@ -18,4 +18,14 @@ public class ViewModel  {
     public void addCommand(Action action) {
         actionsList.add(action);
     }
+
+    public String getFieldValueByAttributeName(String attributeName)
+    {
+        return this.getParameters()
+                .stream()
+                .filter(f -> f.getAttributeName().equals(attributeName))
+                .findFirst()
+                .get()
+                .getAttributeValue();
+    }
 }

@@ -87,8 +87,11 @@ public class RequestService  {
                 requestIdStr, "Show comments to request");
             requestMdlView.addCommand(showComments);
 
+            Action updateComment = new Action(Action.ActionType.UPDATE, "Comment/update", "-1",
+                    "");
+
             Action addComment = new Action(Action.ActionType.ADD, "Comment/add",
-                    requestIdStr, "Add comment to request");
+                    requestIdStr, "Add comment to request", updateComment, updateComment, true);
             requestMdlView.addCommand(addComment);
         }
 
@@ -138,30 +141,17 @@ public class RequestService  {
         } else {
             req = rep.getRequestById(id);
         }
-        req.setDescription(getFieldValueFromView("Description", viewModel));
-        req.setAuthorId(Integer.parseInt(getFieldValueFromView("Author Id", viewModel)));
-        req.setResidentId(Integer.parseInt(getFieldValueFromView("Resident Id", viewModel)));
-        req.setType(RequestType.valueOf(getFieldValueFromView("Type", viewModel)));
-        req.setState(RequestState.valueOf(getFieldValueFromView("Status", viewModel)));
-        if (id < 0) {
-            id = rep.add(req);
-        } else {
-            id = rep.updateRequest(req);
-        }
+        req.setDescription(viewModel.getFieldValueByAttributeName("Description"));
+        req.setAuthorId(Integer.parseInt(viewModel.getFieldValueByAttributeName("Author Id")));
+        req.setResidentId(Integer.parseInt(viewModel.getFieldValueByAttributeName("Resident Id")));
+        req.setType(RequestType.valueOf(viewModel.getFieldValueByAttributeName("Type")));
+        req.setState(RequestState.valueOf(viewModel.getFieldValueByAttributeName("Status")));
+        id = rep.updateRequest(req);
         return fillView(Integer.toString(id));
     }
 
     public ViewModel add() {
         return fillView("-1");
-    }
-    private String getFieldValueFromView(String fieldName, ViewModel view)
-    {
-        return view.getParameters()
-                .stream()
-                .filter(f -> f.getAttributeName().equals(fieldName))
-                .findFirst()
-                .get()
-                .getAttributeValue();
     }
 }
 

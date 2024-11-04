@@ -12,7 +12,7 @@ import java.time.ZonedDateTime;
 @AllArgsConstructor
 @EqualsAndHashCode
 public class Comment {
-    private int commentId;
+    private int commentId = -1;
     private int authorId;
     private int requestId;
     private String state;
@@ -23,5 +23,10 @@ public class Comment {
         this.setState(comment.getState());
         this.setTime(comment.getTime());
         this.setBody(comment.getBody());
+    }
+
+    public Comment(int requestId)
+    {
+        this.requestId = requestId;
     }
 }

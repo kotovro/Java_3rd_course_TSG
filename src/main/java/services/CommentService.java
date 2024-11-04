@@ -14,118 +14,109 @@ import view.ViewModel;
 
 import java.util.List;
 
-@Controller(name = "comment")
 public class CommentService {
 
     @Setter
     RepositoryProvider repositoryProvider;
 
-    @ControllerAction(name = "show")
-    public ViewModel fillView(String commentIdStr) {
-        int requestId = Integer.parseInt(commentIdStr);
+
+    public ViewModel fillEmptyView(String requestId) {
         ViewModel commentMdlView = new ViewModel();
 
-        if (requestId > 0) {
-            commentMdlView.setTitle("Comment" + Integer.toString(requestId));
-        }
-        else {
-            commentMdlView.setTitle("New comment");
-        }
+        Comment comment = new Comment(Integer.parseInt(requestId));
+
+        List<ViewField> parameters = commentMdlView.getParameters();
+        parameters.add(new ViewField("Comment Id", "-1", false, false));
+        parameters.add(new ViewField("Request Id", requestId, false, false));
+        parameters.add(new ViewField("Description", "", true, true));
+        parameters.add(new ViewField("Author Id", "", true, false));
+        parameters.add(new ViewField("Author", "", false, true));
+        parameters.add(new ViewField("Date", "", false, true));
+
+        return commentMdlView;
+    }
+
+    public ViewModel fillView(String commentIdStr) {
+        return fillView(Integer.parseInt(commentIdStr));
+    }
+
+    public ViewModel fillView(int commentId) {
+        ViewModel commentMdlView = new ViewModel();
 
         ICommentRepository commentRepository = repositoryProvider.getCommentRepository();
-        Comment comment = commentRepository.getCommentById(Integer.parseInt(commentIdStr));
+        Comment comment = commentRepository.getCommentById(commentId);
 
-        IRequestRepository requestRep = repositoryProvider.getRequestRepository();
-        Request request = requestRep.getRequestById(comment.getRequestId());
-        if (request == null) {
-            return commentMdlView;
-        }
         IResidentRepository residentRep = repositoryProvider.getResidentRepository();
         IStaffMemberRepository staffRep = repositoryProvider.getStaffMemberRepository();
         String authorName = staffRep.getNameByUserId(comment.getAuthorId()) == null
                 ? staffRep.getNameByUserId(comment.getAuthorId())
                 : residentRep.getNameByUserId(comment.getAuthorId());
+        int requestId = comment.getRequestId();
 
-
-
+        commentMdlView.setTitle("Comment to request " + requestId);
+        String commentIdStr = Integer.toString(commentId);
         List<ViewField> parameters = commentMdlView.getParameters();
         parameters.add(new ViewField("Comment Id", commentIdStr, false, false));
-        parameters.add(new ViewField("Request Id", Integer.toString(request.getRequestId()), false, false));
+        parameters.add(new ViewField("Request Id", Integer.toString(comment.getRequestId()), false, false));
         parameters.add(new ViewField("Description", comment.getBody(), true, true));
         parameters.add(new ViewField("Author Id", Integer.toString(comment.getAuthorId()), true, false));
         parameters.add(new ViewField("Author", authorName, false, true));
         parameters.add(new ViewField("Date", comment.getTime().toString(), false, true));
 
-        List<Action> commands = commentMdlView.getActionsList();
-        Action update = new Action();
-        update.setActionName("Edit comment");
-        update.setActionType(Action.ActionType.UPDATE);
-        update.setRoute("services.CommentService/update");
-        update.setParameter(Integer.toString(requestId));
-        commands.add(update);
 
-        Action add = new Action();
-        add.setActionType(Action.ActionType.ADD);
-        add.setRoute("services.CommentService/update");
-        add.setParameter("-1");
-        commands.add(add);
+        Action show = new Action(Action.ActionType.SHOW, "Comment/show", commentIdStr, "", null, null, false);
 
+        Action update = new Action(Action.ActionType.UPDATE, "Comment/update", commentIdStr,
+                "Edit comment", show, show, true);
+        commentMdlView.addCommand(update);
+
+        Action add = new Action(Action.ActionType.ADD, "Comment/add", Integer.toString(requestId),
+                    "Add new comment", update, update, true);
+        commentMdlView.addCommand(add);
 
         Action delete = new Action();
         delete.setActionType(Action.ActionType.DELETE);
-        commands.add(delete);
+        commentMdlView.addCommand(delete);
 
-        Action back = new Action();
-        back.setActionName("Back to request");
-        back.setActionType(Action.ActionType.SHOW);
-        back.setRoute("services.RequestService/fillView");
-        back.setParameter(Integer.toString(comment.getRequestId()));
-        back.setInteractive(true);
-        commands.add(back);
+        Action back = new Action(Action.ActionType.SHOW, "Request/show", Integer.toString(requestId), "Back to request");
+        commentMdlView.addCommand(back);
 
-        Action showComments = new Action();
-        showComments.setActionName("Show other comments");
-        showComments.setActionType(Action.ActionType.SHOW);
-        showComments.setRoute("services.CommentService/getList");
+        Action showComments = new Action(Action.ActionType.SHOW, "Comment/getList", Integer.toString(requestId), "Show comments");
+        commentMdlView.addCommand(showComments);
 
         Action exit = new Action();
         exit.setActionType(Action.ActionType.EXIT);
-        commands.add(exit);
+        commentMdlView.addCommand(exit);
 
-        Action show = new Action();
-        show.setActionType(Action.ActionType.SHOW);
-        show.setRoute("services.CommentService/fillView");
-        show.setParameter(Integer.toString(requestId));
-        show.setInteractive(false);
-        commands.add(show);
 
         return commentMdlView;
     }
 
-    @ControllerAction(name = "showAll")
     public ViewModel getList(String requestId) {
         ViewModel viewModel = new ViewModel();
         viewModel.setTitle("Comments list");
         ICommentRepository rep = repositoryProvider.getCommentRepository();
-        List<Comment> reqList = rep.getCommentToRequest(Integer.parseInt(requestId));
+        List<Comment> commentList = rep.getCommentToRequest(Integer.parseInt(requestId));
 
         IResidentRepository residentRep = repositoryProvider.getResidentRepository();
         IStaffMemberRepository staffRep = repositoryProvider.getStaffMemberRepository();
-        for (Comment comment : reqList)
+        for (Comment comment : commentList)
         {
             String authorName = staffRep.getNameByUserId(comment.getAuthorId()) == null
                     ? staffRep.getNameByUserId(comment.getAuthorId())
                     : residentRep.getNameByUserId(comment.getAuthorId());
-            String commentMetaData = authorName + " " + comment.getTime().toString();
-            ViewField field = new ViewField(commentMetaData, comment.getBody(), false, true);
-            viewModel.getParameters().add(field);
+            String commentMetaData = comment.getTime().toString() + " " + authorName;
+            Action action = new Action(Action.ActionType.SHOW, "Comment/show", Integer.toString(comment.getCommentId()),
+                    commentMetaData + "\n");
+            viewModel.addCommand(action);
         }
-
-        Action back = new Action();
-        back.setActionName("Back to request");
-        back.setActionType(Action.ActionType.SHOW);
-        back.setRoute("services.RequestService/fillView");
-        back.setParameter(requestId);
+        Action update = new Action(Action.ActionType.UPDATE, "Comment/update", "",
+                "");
+        Action add = new Action(Action.ActionType.ADD, "Comment/add", requestId,
+                "Add new comment", update, update, true);
+        viewModel.addCommand(add);
+        Action back = new Action(Action.ActionType.SHOW, "Request/show", requestId,
+                    "Back to request");
         viewModel.addCommand(back);
 
         Action exit = new Action();
@@ -134,33 +125,20 @@ public class CommentService {
         return viewModel;
     }
 
-    @ControllerAction(name = "update")
+
     public ViewModel update(ViewModel viewModel)
     {
-        int id = Integer.parseInt(
-                viewModel.getParameters()
-                        .stream()
-                        .filter(p -> p.getAttributeName().equals("Comment Id"))
-                        .findFirst()
-                        .get()
-                        .getAttributeValue());
+        int commentId = Integer.parseInt(viewModel.getFieldValueByAttributeName("Comment Id"));
+        int requestId = Integer.parseInt(viewModel.getFieldValueByAttributeName("Request Id"));
 
         ICommentRepository rep = repositoryProvider.getCommentRepository();
-        Comment comment = rep.getCommentById(id);
-        comment.setBody(viewModel.getParameters()
-                .stream()
-                .filter(f -> f.getAttributeName().equals("Description"))
-                .findFirst()
-                .get()
-                .getAttributeValue());
-        comment.setAuthorId(Integer.parseInt(
-                viewModel.getParameters()
-                        .stream()
-                        .filter(f -> f.getAttributeName().equals("Author Id"))
-                        .findFirst()
-                        .get()
-                        .getAttributeValue()));
-        rep.updateComment(comment);
-        return viewModel;
+        Comment comment = commentId < 0 ? new Comment(requestId) : rep.getCommentById(commentId);
+        comment.setBody(viewModel.getFieldValueByAttributeName("Description"));
+        comment.setAuthorId(Integer.parseInt(viewModel.getFieldValueByAttributeName("Author Id")));
+
+        commentId = rep.updateComment(comment);
+
+        return fillView(commentId);
     }
+
 }
