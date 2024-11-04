@@ -2,7 +2,7 @@ import models.entities.*;
 import models.repositories.interfaces.ICommentRepository;
 import models.repositories.interfaces.IRequestRepository;
 import models.repositories.interfaces.IResidentRepository;
-import controller.RepositoryProvider;
+import models.repositories.RepositoryProvider;
 import services.RequestService;
 import view.Action;
 import controller.ControllerService;
@@ -38,10 +38,8 @@ public class Main {
         fillRepositoriesWithTestData(repoProv);
 
         IApplication application = new ConsoleApplication();
-        Action action = new Action();
-        action.setActionType(Action.ActionType.SHOW);
-        action.setRoute("services.RequestService/getList");
-        action.setParameter("");
+        Action action = new Action(Action.ActionType.SHOW, "Request/getList",
+                "", "Back to requests list");
         ControllerService controllerService = new ControllerService();
         application.start(action, controllerService);
 

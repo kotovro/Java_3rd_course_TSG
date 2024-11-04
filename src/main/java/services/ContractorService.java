@@ -35,18 +35,18 @@ public class ContractorService {
 //        parameters.add(new ViewField("Date", request.getTime().toString()));
 //        view.setParameters(parameters);
 //
-//        List<Action> commands = new LinkedList<>();
-//        Action update = new Action();
-//        update.setActionType(Action.ActionType.UPDATE);
+//        List<ControllerAction> commands = new LinkedList<>();
+//        ControllerAction update = new ControllerAction();
+//        update.setActionType(ControllerAction.ActionType.UPDATE);
 //        commands.add(update);
-//        Action add = new Action();
-//        add.setActionType(Action.ActionType.ADD);
-//        Action delete = new Action();
+//        ControllerAction add = new ControllerAction();
+//        add.setActionType(ControllerAction.ActionType.ADD);
+//        ControllerAction delete = new ControllerAction();
 //        commands.add(add);
-//        delete.setActionType(Action.ActionType.DELETE);
-//        Action exit = new Action();
+//        delete.setActionType(ControllerAction.ActionType.DELETE);
+//        ControllerAction exit = new ControllerAction();
 //        commands.add(delete);
-//        exit.setActionType(Action.ActionType.EXIT);
+//        exit.setActionType(ControllerAction.ActionType.EXIT);
 //        commands.add(exit);
 //        requestMdlView.setActionsList(commands);
 //

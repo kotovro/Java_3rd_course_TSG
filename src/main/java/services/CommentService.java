@@ -7,7 +7,7 @@ import models.repositories.interfaces.ICommentRepository;
 import models.repositories.interfaces.IRequestRepository;
 import models.repositories.interfaces.IResidentRepository;
 import models.repositories.interfaces.IStaffMemberRepository;
-import controller.RepositoryProvider;
+import models.repositories.RepositoryProvider;
 import view.Action;
 import view.ViewField;
 import view.ViewModel;
@@ -15,12 +15,12 @@ import view.ViewModel;
 import java.util.List;
 
 @Controller(name = "comment")
-public class CommentService implements IService {
+public class CommentService {
 
     @Setter
     RepositoryProvider repositoryProvider;
 
-    @services.Action(name = "show")
+    @ControllerAction(name = "show")
     public ViewModel fillView(String commentIdStr) {
         int requestId = Integer.parseInt(commentIdStr);
         ViewModel commentMdlView = new ViewModel();
@@ -102,7 +102,7 @@ public class CommentService implements IService {
         return commentMdlView;
     }
 
-    @services.Action(name = "showAll")
+    @ControllerAction(name = "showAll")
     public ViewModel getList(String requestId) {
         ViewModel viewModel = new ViewModel();
         viewModel.setTitle("Comments list");
@@ -134,7 +134,7 @@ public class CommentService implements IService {
         return viewModel;
     }
 
-    @services.Action(name = "update")
+    @ControllerAction(name = "update")
     public ViewModel update(ViewModel viewModel)
     {
         int id = Integer.parseInt(

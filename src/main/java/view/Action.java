@@ -1,11 +1,13 @@
 package view;
 
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
+@AllArgsConstructor
 public class Action {
     public enum ActionType {
         UPDATE,
@@ -16,11 +18,20 @@ public class Action {
         EXIT,
         BACK
     }
+
     private ActionType actionType;
-    private Action onSuccess;
-    private Action onError;
+    private String route = null;
     private String parameter;
-    private boolean isInteractive = true;
     private String actionName;
-    private String route;
+    private Action onSuccess = null;
+    private Action onError = null;
+    private boolean isInteractive = true;
+
+    public Action(ActionType actionType, String route, String parameter, String actionName) {
+        this.actionType = actionType;
+        this.route = route;
+        this.parameter = parameter;
+        this.actionName = actionName;
+    }
+    public Action() {}
 }

@@ -1,6 +1,5 @@
 package controller;
 
-import services.IService;
 import view.Action;
 import view.ViewModel;
 
@@ -21,8 +20,7 @@ public class ControllerService {
 
             c = Class.forName(controllerName);
 
-            IService controller = (IService) c.getDeclaredConstructor().newInstance();
-            controller.setRepositoryProvider(RepositoryProvider.getInstance());
+            Object controller =  c.getDeclaredConstructor().newInstance();
 
             m = c.getMethod(actionName, paramClass);
 
@@ -34,7 +32,7 @@ public class ControllerService {
     }
 
     private String getControllerFromRoute(String route) {
-        return  route.split("/")[0];
+        return  "controller." + route.split("/")[0] + "Controller";
     }
 
     private String getActionFromRoute(String route) {

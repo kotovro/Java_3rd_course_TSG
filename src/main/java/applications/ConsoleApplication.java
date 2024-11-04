@@ -24,7 +24,6 @@ public class ConsoleApplication implements IApplication {
         ViewModel viewModel = null;
         while (action.getActionType() != Action.ActionType.EXIT)
         {
-
             switch (action.getActionType())
             {
                 case SHOW:
@@ -36,10 +35,19 @@ public class ConsoleApplication implements IApplication {
                     action = display(viewModel);
                     break;
                 case UPDATE:
-                    action = updateContext(viewModel);
+                    updateContext(viewModel);
                     viewModel = controllerService.doAction(action, viewModel);
 //                    DEFINITELY RESOLVE SHOW COMMAND DEPENDENCY!
-                    action = action.getOnSuccess();
+                    if (viewModel.getErrorMessage() != null) {
+                        action = action.getOnError();
+                    } else {
+                        action = action.getOnSuccess();
+                    }
+                    break;
+                case ADD:
+//                    viewModel = controllerService.doAction(action, null);
+//                    action = add(viewModel);
+//                    viewModel = controllerService.doAction(action, viewModel);
                     break;
                 case DELETE:
 //                    action = deleteContext();
@@ -48,6 +56,22 @@ public class ConsoleApplication implements IApplication {
             }
 
         }
+    }
+
+    private Action add(ViewModel viewModel) {
+        Scanner scanner = new Scanner(System.in);
+        for (ViewField field : viewModel.getParameters())
+        {
+            if (field.isChangeable())
+            {
+                System.out.print("Enter " + field.getAttributeName() + ": ");
+                String newFiledView = scanner.nextLine();
+                if (newFiledView.length() > 0) {
+                    field.setAttributeValue(newFiledView);
+                }
+            }
+        }
+        return new Action();
     }
 
     private static void clearScreen() {
@@ -70,7 +94,7 @@ public class ConsoleApplication implements IApplication {
         }
     }
 
-    private static Action updateContext(ViewModel viewModel) {
+    private static void updateContext(ViewModel viewModel) {
         Scanner scanner = new Scanner(System.in);
         for (ViewField field : viewModel.getParameters())
         {
@@ -83,8 +107,8 @@ public class ConsoleApplication implements IApplication {
                 }
             }
         }
-        return viewModel.getActionsList().stream().filter(a -> a.getActionType() == Action.ActionType.UPDATE).findFirst().get();
     }
+
     private static String getCommandNameByType(Action.ActionType action) {
         return switch (action)
         {
