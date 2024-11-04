@@ -16,13 +16,14 @@ public class RequestRepositoryInMemory implements IRequestRepository {
 
 
     @Override
-    public void add(Request request) {
+    public int add(Request request) {
 
         int maxIndex = requests.size() == 0 ? 0
                 : requests.stream().max(Comparator.comparing(r -> r.getRequestId())).get().getRequestId();
 
         request.setRequestId(maxIndex + 1);
         requests.add(request);
+        return maxIndex + 1;
     }
 
     @Override
@@ -32,9 +33,10 @@ public class RequestRepositoryInMemory implements IRequestRepository {
     }
 
     @Override
-    public void updateRequest(Request request) {
+    public int updateRequest(Request request) {
         Request temp = getRequestById(request.getRequestId());
         temp.updateFromObject(request);
+        return temp.getRequestId();
     }
 
     @Override

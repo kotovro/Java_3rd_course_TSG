@@ -45,9 +45,10 @@ public class ConsoleApplication implements IApplication {
                     }
                     break;
                 case ADD:
-//                    viewModel = controllerService.doAction(action, null);
-//                    action = add(viewModel);
-//                    viewModel = controllerService.doAction(action, viewModel);
+                    viewModel = controllerService.doAction(action, null);
+                    updateContext(viewModel);
+                    viewModel = controllerService.doAction(action.getOnSuccess(), viewModel);
+                    action = display(viewModel);
                     break;
                 case DELETE:
 //                    action = deleteContext();
@@ -128,9 +129,13 @@ public class ConsoleApplication implements IApplication {
             if (action.isInteractive()) {
                 String actionName = action.getActionName() != null  && action.getActionName().length() > 0
                         ? action.getActionName()
-                        : getCommandNameByType(action.getActionType()) + " ";
-                System.out.print(Integer.toString(i) + ". " + actionName + " ");
+                        : getCommandNameByType(action.getActionType());
+                if (!actionName.endsWith("\n")) {
+                    actionName += " ";
+                }
+                System.out.print(Integer.toString(i) + ". " + actionName);
             }
+
             i++;
         }
         System.out.println();

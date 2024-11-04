@@ -68,13 +68,13 @@ public class RequestService  {
         Action back = new Action(Action.ActionType.SHOW, "Request/getList",
                 "", "Back to requests list");
         Action update = new Action(Action.ActionType.UPDATE, "Request/update",
-                requestIdStr, "Update", show, show,
+                "", "Update", show, show,
                 true);
         requestMdlView.addCommand(update);
 
         if (requestId > 0) {
-            Action add = new Action(Action.ActionType.SHOW, "Request/add",
-                    "-1", "Add", show, show,
+            Action add = new Action(Action.ActionType.ADD, "Request/add",
+                    "", "Add", update, update,
                     true);
             requestMdlView.addCommand(add);
 
@@ -98,8 +98,6 @@ public class RequestService  {
         exit.setActionType(Action.ActionType.EXIT);
         requestMdlView.addCommand(exit);
 
-        requestMdlView.addCommand(show);
-
         return requestMdlView;
     }
 
@@ -110,13 +108,14 @@ public class RequestService  {
         List<Request> reqList = rep.getRequestList();
         for (Request request : reqList)
         {
-            Action action = new Action();
-            action.setActionName("Request " + request.getRequestId() + "\n");
-            action.setActionType(Action.ActionType.SHOW);
-            action.setRoute("Request/show");
-            action.setParameter(Integer.toString(request.getRequestId()));
+            Action action = new Action(Action.ActionType.SHOW, "Request/show", Integer.toString(request.getRequestId()),
+                    "Request " + request.getRequestId() + "\n");
             viewModel.getActionsList().add(action);
         }
+        Action updateNew = new Action(Action.ActionType.UPDATE, "Request/update",
+                "-1", "");
+        Action add = new Action(Action.ActionType.ADD, "Request/add", "-1", "Add new request", updateNew, null, true);
+        viewModel.getActionsList().add(add);
         Action exit = new Action();
         exit.setActionType(Action.ActionType.EXIT);
         viewModel.getActionsList().add(exit);
@@ -145,13 +144,16 @@ public class RequestService  {
         req.setType(RequestType.valueOf(getFieldValueFromView("Type", viewModel)));
         req.setState(RequestState.valueOf(getFieldValueFromView("Status", viewModel)));
         if (id < 0) {
-            rep.add(req);
+            id = rep.add(req);
         } else {
-            rep.updateRequest(req);
+            id = rep.updateRequest(req);
         }
-        return viewModel;
+        return fillView(Integer.toString(id));
     }
 
+    public ViewModel add() {
+        return fillView("-1");
+    }
     private String getFieldValueFromView(String fieldName, ViewModel view)
     {
         return view.getParameters()
