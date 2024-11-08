@@ -3,6 +3,7 @@ import models.repositories.interfaces.ICommentRepository;
 import models.repositories.interfaces.IRequestRepository;
 import models.repositories.interfaces.IResidentRepository;
 import models.repositories.RepositoryProvider;
+import services.ActionProviderFactory;
 import services.RequestService;
 import view.Action;
 import controller.ControllerService;
@@ -40,7 +41,9 @@ public class Main {
         IApplication application = new ConsoleApplication();
         Action action = new Action(Action.ActionType.SHOW, "Request/getList",
                 "", "Back to requests list");
+//        ActionProviderFactory factory = new ActionProviderFactory();
         ControllerService controllerService = new ControllerService();
+//        controllerService
         application.start(action, controllerService);
 
     }

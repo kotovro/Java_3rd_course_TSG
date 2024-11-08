@@ -21,10 +21,9 @@ public class RequestService  {
     RepositoryProvider repositoryProvider;
 
 
-//    public Re
-
-
-    public ViewModel fillView(String requestIdStr) {
+    public ViewModel fillView(String requestIdStr,
+                              IActionProvider requestActionProvider,
+                              IActionProvider commentActionProvider) {
         int requestId = Integer.parseInt(requestIdStr);
         ViewModel requestMdlView = new ViewModel();
 
@@ -63,19 +62,13 @@ public class RequestService  {
         parameters.add(new ViewField("Date", request.getTime().toString(), false, true));
 
 
-        Action show = new Action(Action.ActionType.SHOW, "Request/show",
-                requestIdStr, "", null, null, false);
-        Action back = new Action(Action.ActionType.SHOW, "Request/getList",
-                "", "Back to requests list");
-        Action update = new Action(Action.ActionType.UPDATE, "Request/update",
-                "", "Update", show, show,
-                true);
+        Action show = requestActionProvider.getActionShow(requestIdStr, "", null, null, false);
+        Action back = requestActionProvider.getActionBack("", "Back to requests list");
+        Action update = requestActionProvider.getActionUpdate(requestIdStr, "Update request", show, show);
         requestMdlView.addCommand(update);
 
         if (requestId > 0) {
-            Action add = new Action(Action.ActionType.ADD, "Request/add",
-                    "", "Add", update, update,
-                    true);
+            Action add = requestActionProvider.getActionAdd("", "Add", update, update);
             requestMdlView.addCommand(add);
 
             Action delete = new Action(Action.ActionType.DELETE, "Request/delete",
@@ -83,16 +76,14 @@ public class RequestService  {
                     true);
             requestMdlView.addCommand(delete);
 
-            Action showComments = new Action(Action.ActionType.SHOW, "Comment/getList",
-                requestIdStr, "Show comments to request");
+            Action showComments = commentActionProvider.getActionList(requestIdStr,"Show comments to request", null, null);
             requestMdlView.addCommand(showComments);
 
-            Action updateComment = new Action(Action.ActionType.UPDATE, "Comment/update", "-1",
-                    "");
-
-            Action addComment = new Action(Action.ActionType.ADD, "Comment/add",
-                    requestIdStr, "Add comment to request", updateComment, updateComment, true);
-            requestMdlView.addCommand(addComment);
+//            Action updateComment = commentActionProvider.getActionUpdate(request.);
+//
+//            Action addComment = commentActionProvider.getActionAdd(requestIdStr, "Add comment to request",
+//                    updateComment, updateComment);
+//            requestMdlView.addCommand(addComment);
         }
 
         requestMdlView.addCommand(back);
@@ -104,20 +95,18 @@ public class RequestService  {
         return requestMdlView;
     }
 
-    public ViewModel getList() {
+    public ViewModel getList(IActionProvider requestActionProvider) {
         ViewModel viewModel = new ViewModel();
         viewModel.setTitle("Requests list");
         IRequestRepository rep = repositoryProvider.getRequestRepository();
         List<Request> reqList = rep.getRequestList();
         for (Request request : reqList)
         {
-            Action action = new Action(Action.ActionType.SHOW, "Request/show", Integer.toString(request.getRequestId()),
-                    "Request " + request.getRequestId() + "\n");
+            Action action = requestActionProvider.getActionShow( Integer.toString(request.getRequestId()), "Request " + request.getRequestId() + "\n", null, null, true);
             viewModel.getActionsList().add(action);
         }
-        Action updateNew = new Action(Action.ActionType.UPDATE, "Request/update",
-                "-1", "");
-        Action add = new Action(Action.ActionType.ADD, "Request/add", "-1", "Add new request", updateNew, null, true);
+        Action updateNew = requestActionProvider.getActionUpdate("-1", "", null, null);
+        Action add = requestActionProvider.getActionAdd("-1", "Add new request", updateNew, null);
         viewModel.getActionsList().add(add);
         Action exit = new Action();
         exit.setActionType(Action.ActionType.EXIT);
@@ -125,7 +114,9 @@ public class RequestService  {
         return viewModel;
     }
 
-    public ViewModel update(ViewModel viewModel) {
+    public ViewModel update(ViewModel viewModel,
+                            IActionProvider requestActionProvider,
+                            IActionProvider commentActionProvider) {
         int id = Integer.parseInt(
                 viewModel.getParameters()
                         .stream()
@@ -147,11 +138,11 @@ public class RequestService  {
         req.setType(RequestType.valueOf(viewModel.getFieldValueByAttributeName("Type")));
         req.setState(RequestState.valueOf(viewModel.getFieldValueByAttributeName("Status")));
         id = rep.updateRequest(req);
-        return fillView(Integer.toString(id));
+        return fillView(Integer.toString(id), requestActionProvider, commentActionProvider);
     }
 
-    public ViewModel add() {
-        return fillView("-1");
+    public ViewModel add(IActionProvider requestActionProvider, IActionProvider commentActionProvider) {
+        return fillView("-1", requestActionProvider, commentActionProvider);
     }
 }
 

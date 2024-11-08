@@ -42,7 +42,8 @@ public class CommentRepositoryInMemory implements ICommentRepository {
 
     @Override
     public void deleteComment(int commentId) {
-        comments.removeIf(c -> c.getCommentId() == commentId);
+        Comment comment = comments.stream().filter(c -> c.getCommentId() == commentId).findFirst().get();
+//        comment.setDeleted(true);
     }
 
     @Override

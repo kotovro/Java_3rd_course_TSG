@@ -18,6 +18,7 @@ public class Comment {
     private String state;
     private ZonedDateTime time;
     private String body;
+//    private boolean ;
 
     public void updateFromObject(Comment comment) {
         this.setState(comment.getState());

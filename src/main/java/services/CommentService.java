@@ -19,6 +19,7 @@ public class CommentService {
     @Setter
     RepositoryProvider repositoryProvider;
 
+    private CommentActionService actionService;
 
     public ViewModel fillEmptyView(String requestId) {
         ViewModel commentMdlView = new ViewModel();
@@ -36,11 +37,15 @@ public class CommentService {
         return commentMdlView;
     }
 
-    public ViewModel fillView(String commentIdStr) {
-        return fillView(Integer.parseInt(commentIdStr));
+    public ViewModel fillView(String commentIdStr,
+                              IActionProvider commentActionProvider,
+                              IActionProvider requestActionProvider) {
+        return fillView(Integer.parseInt(commentIdStr), commentActionProvider, requestActionProvider);
     }
 
-    public ViewModel fillView(int commentId) {
+    public ViewModel fillView(int commentId,
+                              IActionProvider commentActionProvider,
+                              IActionProvider requestActionProvider) {
         ViewModel commentMdlView = new ViewModel();
 
         ICommentRepository commentRepository = repositoryProvider.getCommentRepository();
@@ -64,24 +69,23 @@ public class CommentService {
         parameters.add(new ViewField("Date", comment.getTime().toString(), false, true));
 
 
-        Action show = new Action(Action.ActionType.SHOW, "Comment/show", commentIdStr, "", null, null, false);
+        Action show = commentActionProvider.getActionShow(commentIdStr, "", null, null, false);
 
-        Action update = new Action(Action.ActionType.UPDATE, "Comment/update", commentIdStr,
-                "Edit comment", show, show, true);
+        Action update = commentActionProvider.getActionUpdate(commentIdStr, "Edit comment", show, show);
         commentMdlView.addCommand(update);
 
-        Action add = new Action(Action.ActionType.ADD, "Comment/add", Integer.toString(requestId),
-                    "Add new comment", update, update, true);
+        Action add = commentActionProvider.getActionAdd(Integer.toString(requestId),
+                    "Add new comment", update, update);
         commentMdlView.addCommand(add);
 
         Action delete = new Action();
         delete.setActionType(Action.ActionType.DELETE);
         commentMdlView.addCommand(delete);
 
-        Action back = new Action(Action.ActionType.SHOW, "Request/show", Integer.toString(requestId), "Back to request");
+        Action back = requestActionProvider.getActionBack(Integer.toString(requestId), "Back to request");
         commentMdlView.addCommand(back);
 
-        Action showComments = new Action(Action.ActionType.SHOW, "Comment/getList", Integer.toString(requestId), "Show comments");
+        Action showComments = commentActionProvider.getActionList(Integer.toString(requestId), "Show other comments", null, null);
         commentMdlView.addCommand(showComments);
 
         Action exit = new Action();
@@ -92,7 +96,9 @@ public class CommentService {
         return commentMdlView;
     }
 
-    public ViewModel getList(String requestId) {
+    public ViewModel getList(String requestId,
+                             IActionProvider commentActionProvider,
+                             IActionProvider requestActionProvider) {
         ViewModel viewModel = new ViewModel();
         viewModel.setTitle("Comments list");
         ICommentRepository rep = repositoryProvider.getCommentRepository();
@@ -106,17 +112,14 @@ public class CommentService {
                     ? staffRep.getNameByUserId(comment.getAuthorId())
                     : residentRep.getNameByUserId(comment.getAuthorId());
             String commentMetaData = comment.getTime().toString() + " " + authorName;
-            Action action = new Action(Action.ActionType.SHOW, "Comment/show", Integer.toString(comment.getCommentId()),
-                    commentMetaData + "\n");
+            Action action = commentActionProvider.getActionShow(Integer.toString(comment.getCommentId()),
+                    commentMetaData + "\n", null, null, true);
             viewModel.addCommand(action);
         }
-        Action update = new Action(Action.ActionType.UPDATE, "Comment/update", "",
-                "");
-        Action add = new Action(Action.ActionType.ADD, "Comment/add", requestId,
-                "Add new comment", update, update, true);
+        Action update = commentActionProvider.getActionUpdate("","", null, null);
+        Action add = commentActionProvider.getActionAdd(requestId, "Add new comment", update, update);
         viewModel.addCommand(add);
-        Action back = new Action(Action.ActionType.SHOW, "Request/show", requestId,
-                    "Back to request");
+        Action back = requestActionProvider.getActionBack(requestId,"Back to request");
         viewModel.addCommand(back);
 
         Action exit = new Action();
@@ -126,7 +129,9 @@ public class CommentService {
     }
 
 
-    public ViewModel update(ViewModel viewModel)
+    public ViewModel update(ViewModel viewModel,
+                            IActionProvider commentActionProvider,
+                            IActionProvider requestActionProvider)
     {
         int commentId = Integer.parseInt(viewModel.getFieldValueByAttributeName("Comment Id"));
         int requestId = Integer.parseInt(viewModel.getFieldValueByAttributeName("Request Id"));
@@ -138,7 +143,11 @@ public class CommentService {
 
         commentId = rep.updateComment(comment);
 
-        return fillView(commentId);
+        return fillView(commentId, commentActionProvider, requestActionProvider);
     }
 
+    public void delete(String commentId) {
+        ICommentRepository rep = repositoryProvider.getCommentRepository();
+        rep.deleteComment(Integer.parseInt(commentId));
+    }
 }
