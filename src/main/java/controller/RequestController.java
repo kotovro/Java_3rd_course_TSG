@@ -11,8 +11,6 @@ public class RequestController {
 
     RepositoryProvider rep = RepositoryProvider.getInstance();
     RequestService requestService = new RequestService();
-    IActionProvider requestActionProvider = new RequestActionService();
-    IActionProvider commentActionProvider = new CommentActionService();
 
 
     public RequestController() {
@@ -20,15 +18,15 @@ public class RequestController {
     }
 
     public ViewModel show(String id) {
-        return requestService.fillView(id, requestActionProvider, commentActionProvider);
+        return requestService.fillView(id);
     }
 
     public ViewModel update(ViewModel viewModel) {
-        return requestService.update(viewModel, requestActionProvider, commentActionProvider);
+        return requestService.update(viewModel);
 
     }
     public ViewModel add(String str) {
-        return requestService.fillView("-1", requestActionProvider, commentActionProvider);
+        return requestService.fillView("-1");
     }
         public ViewModel delete(ViewModel viewModel) {
 //        mock
@@ -36,7 +34,7 @@ public class RequestController {
     }
 
     public ViewModel getList(String param) {
-        return requestService.getList(requestActionProvider);
+        return requestService.getList();
     }
 
 }

@@ -21,9 +21,7 @@ public class RequestService  {
     RepositoryProvider repositoryProvider;
 
 
-    public ViewModel fillView(String requestIdStr,
-                              IActionProvider requestActionProvider,
-                              IActionProvider commentActionProvider) {
+    public ViewModel fillView(String requestIdStr) {
         int requestId = Integer.parseInt(requestIdStr);
         ViewModel requestMdlView = new ViewModel();
 
@@ -61,7 +59,7 @@ public class RequestService  {
         parameters.add(new ViewField("Status", request.getState().toString(), true, true));
         parameters.add(new ViewField("Date", request.getTime().toString(), false, true));
 
-
+        IActionProvider requestActionProvider = ActionProviderContainer.getRequestActionProvider();
         Action show = requestActionProvider.getActionShow(requestIdStr, "", null, null, false);
         Action back = requestActionProvider.getActionBack("", "Back to requests list");
         Action update = requestActionProvider.getActionUpdate(requestIdStr, "Update request", show, show);
@@ -76,6 +74,7 @@ public class RequestService  {
                     true);
             requestMdlView.addCommand(delete);
 
+            IActionProvider commentActionProvider = ActionProviderContainer.getCommentActionProvider();
             Action showComments = commentActionProvider.getActionList(requestIdStr,"Show comments to request", null, null);
             requestMdlView.addCommand(showComments);
 
@@ -95,11 +94,12 @@ public class RequestService  {
         return requestMdlView;
     }
 
-    public ViewModel getList(IActionProvider requestActionProvider) {
+    public ViewModel getList() {
         ViewModel viewModel = new ViewModel();
         viewModel.setTitle("Requests list");
         IRequestRepository rep = repositoryProvider.getRequestRepository();
         List<Request> reqList = rep.getRequestList();
+        IActionProvider requestActionProvider = ActionProviderContainer.getRequestActionProvider();
         for (Request request : reqList)
         {
             Action action = requestActionProvider.getActionShow( Integer.toString(request.getRequestId()), "Request " + request.getRequestId() + "\n", null, null, true);
@@ -114,9 +114,7 @@ public class RequestService  {
         return viewModel;
     }
 
-    public ViewModel update(ViewModel viewModel,
-                            IActionProvider requestActionProvider,
-                            IActionProvider commentActionProvider) {
+    public ViewModel update(ViewModel viewModel) {
         int id = Integer.parseInt(
                 viewModel.getParameters()
                         .stream()
@@ -138,11 +136,12 @@ public class RequestService  {
         req.setType(RequestType.valueOf(viewModel.getFieldValueByAttributeName("Type")));
         req.setState(RequestState.valueOf(viewModel.getFieldValueByAttributeName("Status")));
         id = rep.updateRequest(req);
-        return fillView(Integer.toString(id), requestActionProvider, commentActionProvider);
+
+        return fillView(Integer.toString(id));
     }
 
-    public ViewModel add(IActionProvider requestActionProvider, IActionProvider commentActionProvider) {
-        return fillView("-1", requestActionProvider, commentActionProvider);
+    public ViewModel add() {
+        return fillView("-1");
     }
 }
 

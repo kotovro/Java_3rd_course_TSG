@@ -1,16 +1,11 @@
 package controller;
 
 import models.repositories.RepositoryProvider;
-import services.CommentActionService;
-import services.CommentService;
-import services.IActionProvider;
-import services.RequestActionService;
+import services.*;
 import view.ViewModel;
 
 public class CommentController {
     RepositoryProvider rep = RepositoryProvider.getInstance();
-    IActionProvider commentActionService = new CommentActionService();
-    IActionProvider requestActionService = new RequestActionService();
     CommentService service = new CommentService();
 
     public CommentController() {
@@ -18,11 +13,11 @@ public class CommentController {
     }
 
     public ViewModel show(String id) {
-        return service.fillView(id, commentActionService, requestActionService);
+        return service.fillView(id);
     }
 
     public ViewModel update(ViewModel viewModel) {
-        return service.update(viewModel, commentActionService, requestActionService);
+        return service.update(viewModel);
 
     }
     public ViewModel add(String requestId) {
@@ -34,6 +29,6 @@ public class CommentController {
     }
 
     public ViewModel getList(String requestId) {
-        return service.getList(requestId, commentActionService, requestActionService);
+        return service.getList(requestId);
     }
 }
