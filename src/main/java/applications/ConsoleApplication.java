@@ -39,7 +39,11 @@ public class ConsoleApplication implements IApplication {
                     viewModel = controllerService.doAction(action, viewModel);
 //                    DEFINITELY RESOLVE SHOW COMMAND DEPENDENCY!
                     if (viewModel.getErrorMessage() != null) {
-                        action = action.getOnError();
+                        if (action.getOnError() != null) {
+                            action = action.getOnError();
+                        } else {
+                            action = display(viewModel);
+                        }
                     } else {
                         action = action.getOnSuccess();
                     }
@@ -170,7 +174,13 @@ public class ConsoleApplication implements IApplication {
         List<Action> actions = viewModel.getActionsList();
         Scanner sc = new Scanner(System.in);
         System.out.print("Enter action number: ");
-        int actionNumber = sc.nextInt();
+        String actionNumberStr = sc.next();
+        int actionNumber = -1;
+        try {
+            actionNumber = Integer.parseInt(actionNumberStr);
+        } catch (NumberFormatException e) {
+
+        }
         if (actionNumber < 1 || actionNumber > actions.size()) {
             viewModel.setErrorMessage("Invalid action");
         } else {

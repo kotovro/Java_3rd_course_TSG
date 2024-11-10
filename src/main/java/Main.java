@@ -3,7 +3,9 @@ import models.repositories.interfaces.ICommentRepository;
 import models.repositories.interfaces.IRequestRepository;
 import models.repositories.interfaces.IResidentRepository;
 import models.repositories.RepositoryProvider;
+import models.repositories.interfaces.IUserRepository;
 import services.*;
+import services.actionProviders.*;
 import view.Action;
 import controller.ControllerService;
 import applications.IApplication;
@@ -17,16 +19,13 @@ public class Main {
         ICommentRepository commentRepository =  repProvider.getCommentRepository();
         commentRepository.add(new Comment(1, 1, 1, "s", ZonedDateTime.now(), "NOPE"));
 
+        IUserRepository userRepository = repProvider.getUserRepository();
+        userRepository.add(new User(1, "test", "HnO6qrPRkmsVkONr/TOUvQ==", new byte[]{83, 59, 110, 125, 48, 77, 18, 99, -18, -69, -67, -103, -67, 44, 124, -61}));
         IResidentRepository residentRepository = repProvider.getResidentRepository();
         residentRepository.add(new Resident(1, 1, "Saaas", "Sooos", true, "19A", "Test"));
         IRequestRepository requestRepository = repProvider.getRequestRepository();
         requestRepository.add(new Request(1, RequestType.COLLECTIVE, RequestState.STOPPED, "Somethong's wrong", 1, 1,  ZonedDateTime.now(), false));
 
-    }
-
-    private static void fillRouting() {
-
-//        RoutingService.registerController(RequestService.class, "");
     }
 
     public static void main(String[] args){
@@ -38,14 +37,20 @@ public class Main {
         fillRepositoriesWithTestData(repoProv);
 
         IApplication application = new ConsoleApplication();
-        Action action = new Action(Action.ActionType.SHOW, "Request/getList",
-                "", "Back to requests list");
-//        ActionProviderContainer factory = new ActionProviderContainer();
+//        Action action = new Action(Action.ActionType.SHOW, "Request/getList",
+//                "", "Back to requests list");
         ControllerService controllerService = new ControllerService();
-        IActionProvider commentActionService = new CommentActionService();
-        IActionProvider requestActionService = new RequestActionService();
-        ActionProviderContainer.init(commentActionService, requestActionService);
-        application.start(action, controllerService);
+        IActionProvider commentActionService = new CommentActionProvider();
+        IActionProvider requestActionService = new RequestActionProvider();
+        IActionProvider loginActionProvider = new LoginActionProvider();
+        IActionProvider userActionProvider = new UserActionProvider();
+        ActionProviderContainer.init(commentActionService,
+                                    requestActionService,
+                                    loginActionProvider,
+                                    userActionProvider);
+        Action landing = loginActionProvider.getActionShow("", "", null, null, false);
+//        Action login = loginActionProvider.getActionAdd("", "", landing, null);
+        application.start(landing, controllerService);
 
     }
 }

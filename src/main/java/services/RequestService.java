@@ -9,6 +9,8 @@ import models.repositories.interfaces.IRequestRepository;
 import models.repositories.interfaces.IResidentRepository;
 import models.repositories.interfaces.IStaffMemberRepository;
 import models.repositories.RepositoryProvider;
+import services.actionProviders.ActionProviderContainer;
+import services.actionProviders.IActionProvider;
 import view.Action;
 import view.ViewField;
 import view.ViewModel;
@@ -18,7 +20,7 @@ import java.util.List;
 public class RequestService  {
 
     @Setter
-    RepositoryProvider repositoryProvider;
+    private RepositoryProvider repositoryProvider;
 
 
     public ViewModel fillView(String requestIdStr) {
@@ -69,20 +71,12 @@ public class RequestService  {
             Action add = requestActionProvider.getActionAdd("", "Add", update, update);
             requestMdlView.addCommand(add);
 
-            Action delete = new Action(Action.ActionType.DELETE, "Request/delete",
-                    requestIdStr, "Delete", back, show,
-                    true);
+            Action delete = requestActionProvider.getActionDelete(requestIdStr, "Delete");
             requestMdlView.addCommand(delete);
 
             IActionProvider commentActionProvider = ActionProviderContainer.getCommentActionProvider();
             Action showComments = commentActionProvider.getActionList(requestIdStr,"Show comments to request", null, null);
             requestMdlView.addCommand(showComments);
-
-//            Action updateComment = commentActionProvider.getActionUpdate(request.);
-//
-//            Action addComment = commentActionProvider.getActionAdd(requestIdStr, "Add comment to request",
-//                    updateComment, updateComment);
-//            requestMdlView.addCommand(addComment);
         }
 
         requestMdlView.addCommand(back);

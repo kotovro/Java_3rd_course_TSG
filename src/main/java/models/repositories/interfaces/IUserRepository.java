@@ -6,9 +6,10 @@ import models.entities.User;
 import java.util.List;
 
 public interface IUserRepository {
-    void add(User user);
+    int add(User user);
     User getUserById(int UserId);
-    void updateUser(User user);
+    User getUserByLogin(String login);
+    int updateUser(User user);
     void deleteUser(int UserId);
 
     List<User> getUserList();

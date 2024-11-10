@@ -6,6 +6,8 @@ import models.repositories.interfaces.ICommentRepository;
 import models.repositories.interfaces.IResidentRepository;
 import models.repositories.interfaces.IStaffMemberRepository;
 import models.repositories.RepositoryProvider;
+import services.actionProviders.ActionProviderContainer;
+import services.actionProviders.IActionProvider;
 import view.Action;
 import view.ViewField;
 import view.ViewModel;
@@ -15,7 +17,7 @@ import java.util.List;
 public class CommentService {
 
     @Setter
-    RepositoryProvider repositoryProvider;
+    private RepositoryProvider repositoryProvider;
 
 
     public ViewModel fillEmptyView(String requestId) {
@@ -72,8 +74,7 @@ public class CommentService {
                     "Add new comment", update, update);
         commentMdlView.addCommand(add);
 
-        Action delete = new Action();
-        delete.setActionType(Action.ActionType.DELETE);
+        Action delete = commentActionProvider.getActionDelete(commentIdStr, "Delete");
         commentMdlView.addCommand(delete);
 
         IActionProvider requestActionProvider = ActionProviderContainer.getRequestActionProvider();

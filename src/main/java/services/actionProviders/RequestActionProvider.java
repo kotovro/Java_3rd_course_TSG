@@ -1,20 +1,8 @@
-package services;
+package services.actionProviders;
 
 import view.Action;
 
-public class RequestActionService implements IActionProvider {
-
-    public Action getActionBack() {
-        return null;
-    }
-
-    public Action getActionShow(String requestId) {
-        return null;
-    }
-
-    public Action getActionEdit(String requestId) {
-        return null;
-    }
+public class RequestActionProvider implements IActionProvider {
 
     @Override
     public Action getActionUpdate(String param, String name, Action onSuccess, Action onError) {
@@ -31,7 +19,8 @@ public class RequestActionService implements IActionProvider {
 
     @Override
     public Action getActionList(String requestId, String name, Action onSuccess, Action onError) {
-        return null;
+        return  new Action(Action.ActionType.SHOW, "Request/getList",
+                requestId, name);
     }
 
     @Override
@@ -44,5 +33,10 @@ public class RequestActionService implements IActionProvider {
     public Action getActionAdd(String requestId, String name, Action onSuccess, Action onError) {
         return new Action(Action.ActionType.ADD, "Request/add",
                 requestId, name, onSuccess, onError, true);
+    }
+
+    @Override
+    public Action getActionDelete(String param, String name) {
+        return new Action(Action.ActionType.DELETE, "Request/delete", param, name);
     }
 }

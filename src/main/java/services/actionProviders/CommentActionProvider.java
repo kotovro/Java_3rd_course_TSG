@@ -1,8 +1,8 @@
-package services;
+package services.actionProviders;
 
 import view.Action;
 
-public class CommentActionService implements IActionProvider{
+public class CommentActionProvider implements IActionProvider {
 
 
     @Override
@@ -30,5 +30,11 @@ public class CommentActionService implements IActionProvider{
     public Action getActionAdd(String param, String name, Action onSuccess, Action onError) {
         return new Action(Action.ActionType.ADD, "Comment/add", param,
                 name, onSuccess, onError, true);
+    }
+
+    @Override
+    public Action getActionDelete(String param, String name) {
+        return new Action(Action.ActionType.DELETE, "Comment/delete",
+                param, name);
     }
 }
