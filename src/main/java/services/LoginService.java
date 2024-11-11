@@ -60,31 +60,12 @@ public class LoginService {
         return vm;
     }
 
-
-    private String hashPassword(String password, byte[] salt) {
-        KeySpec spec = new PBEKeySpec(password.toCharArray(), salt, 65536, 128);
-        byte[] hash = null;
-        try {
-            SecretKeyFactory f = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
-            hash = f.generateSecret(spec).getEncoded();
-        } catch (Exception e) {
-//            e.printStackTrace();
-        }
-        Base64.Encoder enc = Base64.getEncoder();
-        return enc.encodeToString(hash);
-    }
-
     public ViewModel authenticate(ViewModel viewModel) {
         String login = viewModel.getFieldValueByAttributeName("Login");
         String password = viewModel.getFieldValueByAttributeName("Password");
         IUserRepository rep = repositoryProvider.getUserRepository();
-        User usr = rep.getUserByLogin(login);
+        User usr = rep.authenticate(login, password);
         if (usr == null) {
-            viewModel.setErrorMessage("Invalid login or password");
-            return viewModel;
-        }
-        String hash = hashPassword(password, usr.getPasswordSalt());
-        if (!hash.equals(usr.getPassword())) {
             viewModel.setErrorMessage("Invalid login or password");
             return viewModel;
         }

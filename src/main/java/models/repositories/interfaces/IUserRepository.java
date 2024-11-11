@@ -8,9 +8,9 @@ import java.util.List;
 public interface IUserRepository {
     int add(User user);
     User getUserById(int UserId);
-    User getUserByLogin(String login);
+    User authenticate(String login, String password);
     int updateUser(User user);
     void deleteUser(int UserId);
-
+    void hashUserPassword(User user);
     List<User> getUserList();
 }

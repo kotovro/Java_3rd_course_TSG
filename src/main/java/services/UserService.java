@@ -106,7 +106,7 @@ public class UserService {
                         .get()
                         .getAttributeValue());
         IUserRepository rep = repositoryProvider.getUserRepository();
-        User user = null;
+        User user;
         if (id < 0)
         {
             user = new User();
@@ -114,7 +114,11 @@ public class UserService {
             user = rep.getUserById(id);
         }
         user.setLogin(viewModel.getFieldValueByAttributeName("Login"));
-        user.setPassword(viewModel.getFieldValueByAttributeName("Password"));
+        String newPassword = viewModel.getFieldValueByAttributeName("Password");
+        if (!newPassword.equals(user.getPassword())) {
+            user.setPassword(newPassword);
+            rep.hashUserPassword(user);
+        }
         id = rep.updateUser(user);
 
         return fillView(Integer.toString(id));
