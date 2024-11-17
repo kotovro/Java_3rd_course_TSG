@@ -33,6 +33,10 @@ public class UserRepositoryInMemory implements IUserRepository {
         return enc.encodeToString(hash);
     }
 
+    private int getUserIdFromToken(String token) {
+        return Integer.parseInt(token);
+    }
+
     @Override
     public void hashUserPassword(User user) {
         byte[] salt = user.getPasswordSalt();
@@ -61,6 +65,12 @@ public class UserRepositoryInMemory implements IUserRepository {
     }
 
     @Override
+    public User getUserByToken(String token) {
+        int userId = getUserIdFromToken(token);
+        return users.stream().filter(u -> u.getUserId() == userId).findFirst().get();
+    }
+
+    @Override
     public User authenticate(String login, String password) {
         User usr = null;
         try {
@@ -78,6 +88,11 @@ public class UserRepositoryInMemory implements IUserRepository {
     @Override
     public void deleteUser(int userId) {
         users.removeIf(u -> u.getUserId() == userId);
+    }
+
+    @Override
+    public String getUserToken(int userId) {
+        return Integer.toString(userId);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package services.actionProviders;
 
+import models.entities.Permission;
 import view.Action;
 
 public interface IActionProvider {

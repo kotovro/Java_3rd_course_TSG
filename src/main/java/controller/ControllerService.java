@@ -6,7 +6,7 @@ import view.ViewModel;
 import java.lang.reflect.Method;
 
 public class ControllerService {
-    public ViewModel doAction(Action action, ViewModel viewModel) throws RuntimeException {
+    public ViewModel doAction(Action action, ViewModel viewModel, String userToken) throws RuntimeException {
         Class<?> c = null;
         Method m = null;
 
@@ -20,7 +20,7 @@ public class ControllerService {
 
             c = Class.forName(controllerName);
 
-            Object controller =  c.getDeclaredConstructor().newInstance();
+            Object controller =  c.getDeclaredConstructor(String.class).newInstance(userToken);
 
             m = c.getMethod(actionName, paramClass);
 

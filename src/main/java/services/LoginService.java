@@ -28,11 +28,16 @@ public class LoginService {
 
         IActionProvider requestActionProvider = ActionProviderContainer.getRequestActionProvider();
         Action showRequest = requestActionProvider.getActionList("", "Show requests\n", null, null);
+        // add user to all actions
         viewModel.addCommand(showRequest);
 
         IActionProvider userActionProvider = ActionProviderContainer.getUserActionProvider();
         Action showUsers = userActionProvider.getActionList("", "Show users\n", null, null);
         viewModel.addCommand(showUsers);
+
+        IActionProvider role = ActionProviderContainer.getRoleActionProvider();
+        Action showRoles = role.getActionList("", "Show roles\n", null, null);
+        viewModel.addCommand(showRoles);
         //        IActionProvider userAction = ActionProviderContainer.getRequestActionProvider();
 //        Action updateNew = requestActionProvider.getActionUpdate("-1", "", null, null);
 //        Action add = requestActionProvider.getActionAdd("-1", "Add new request", updateNew, null);
@@ -70,6 +75,7 @@ public class LoginService {
             return viewModel;
         }
         viewModel.setErrorMessage(null);
+        viewModel.setUserToken(rep.getUserToken(usr.getUserId()));
         return viewModel;
     }
 }

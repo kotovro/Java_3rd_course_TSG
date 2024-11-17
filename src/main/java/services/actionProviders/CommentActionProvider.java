@@ -1,5 +1,7 @@
 package services.actionProviders;
 
+import models.entities.PermissionLevel;
+import models.entities.Permissions;
 import view.Action;
 
 public class CommentActionProvider implements IActionProvider {
@@ -7,7 +9,7 @@ public class CommentActionProvider implements IActionProvider {
 
     @Override
     public Action getActionShow(String param, String name, Action onSuccess, Action onError, boolean isInteractive) {
-        return new Action(Action.ActionType.SHOW, "Comment/show", param, name, onSuccess, onError, isInteractive);
+        return new Action(Action.ActionType.SHOW, "Comment/show", param, name, onSuccess, onError, isInteractive, Permissions.COMMENT, PermissionLevel.NOT_ACCESSIBLE);
     }
 
     @Override
@@ -18,7 +20,7 @@ public class CommentActionProvider implements IActionProvider {
 
     @Override
     public Action getActionUpdate(String commentId, String name, Action onSuccess, Action onError) {
-        return new Action(Action.ActionType.UPDATE, "Comment/update", commentId, name, onSuccess, onError, true);
+        return new Action(Action.ActionType.UPDATE, "Comment/update", commentId, name, onSuccess, onError, true, Permissions.COMMENT, PermissionLevel.READONLY);
     }
 
     @Override
@@ -29,7 +31,7 @@ public class CommentActionProvider implements IActionProvider {
     @Override
     public Action getActionAdd(String param, String name, Action onSuccess, Action onError) {
         return new Action(Action.ActionType.ADD, "Comment/add", param,
-                name, onSuccess, onError, true);
+                name, onSuccess, onError, true, Permissions.COMMENT, PermissionLevel.ADD_NEW);
     }
 
     @Override

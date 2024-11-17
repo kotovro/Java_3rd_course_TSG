@@ -15,6 +15,8 @@ public class RepositoryProvider {
     private IUserRepository userRepository;
     private  IStaffMemberRepository staffMemberRepository;
     private ITimesheetRepository timesheetRepository;
+    private IRoleRepository roleRepository;
+    private IPermissionsRepository permissionRepository;
     private RepositoryType repositoryType;
 
     public enum RepositoryType {
@@ -47,6 +49,8 @@ public class RepositoryProvider {
             this.userRepository = new UserRepositoryInMemory();
             this.timesheetRepository = new TimesheetRepositoryInMemory();
             this.requestRepository = new RequestRepositoryInMemory();
+            this.roleRepository = new RoleRepositoryInMemory();
+            this.permissionRepository = new PermissionRepositoryInMemory();
 //            this.invoiceRepository = new InvoiceRepositoryInMemory();
 
         }

@@ -13,6 +13,8 @@ public class ViewModel  {
     private List<ViewField> parameters = new LinkedList<>();
     private List<Action> actionsList = new LinkedList<>();
     @Setter
+    private String userToken;
+    @Setter
     private String errorMessage;
 
     public void addCommand(Action action) {

@@ -5,12 +5,12 @@ import models.repositories.RepositoryProvider;
 import services.LoginService;
 import view.ViewModel;
 
-public class LoginController {
-    RepositoryProvider rep = RepositoryProvider.getInstance();
+public class LoginController extends AbstractController {
     LoginService service = new LoginService();
 
 
-    public LoginController() {
+    public LoginController(String userToken) {
+        super(userToken);
         service.setRepositoryProvider(rep);
     }
 
@@ -23,6 +23,8 @@ public class LoginController {
     }
 
     public ViewModel landing(String userId) {
-        return service.getMenu();
+        ViewModel vm = service.getMenu();
+        vm.setUserToken(userToken);
+        return permissionService.applyPermissions(vm);
     }
 }

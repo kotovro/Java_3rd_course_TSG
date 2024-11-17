@@ -5,6 +5,9 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.LinkedList;
+import java.util.List;
+
 @Setter
 @Getter
 @AllArgsConstructor
@@ -14,6 +17,7 @@ public class User {
     private String login;
     private String password;
     private byte[] passwordSalt;
+    private List<Integer> roles = new LinkedList<>();
 
     public User() {
     }
@@ -22,5 +26,6 @@ public class User {
         this.setLogin(user.getLogin());
         this.setPassword(user.getPassword());
         this.setPasswordSalt(user.getPasswordSalt());
+        this.setRoles(user.getRoles());
     }
 }

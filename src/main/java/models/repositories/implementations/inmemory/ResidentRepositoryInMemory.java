@@ -14,11 +14,9 @@ public class ResidentRepositoryInMemory implements IResidentRepository {
 
     @Override
     public void add(Resident resident) {
-        if (residents != null && residents.size() > 0) {
-            int maxIndex = residents.stream().max(Comparator.comparing(r -> r.getResidentId())).get().getResidentId();
-            resident.setResidentId(maxIndex + 1);
-        }
-        resident.setResidentId(1);
+        int maxIndex = residents.isEmpty() ? 0
+                : residents.stream().max(Comparator.comparing(r -> r.getResidentId())).get().getResidentId();
+        resident.setResidentId(maxIndex + 1);
         residents.add(resident);
     }
 

@@ -1,35 +1,46 @@
 package controller;
 
 import models.repositories.RepositoryProvider;
+import services.PermissionsService;
 import services.UserService;
 import view.ViewModel;
 
-public class UserController {
+import javax.swing.text.View;
 
-    RepositoryProvider rep = RepositoryProvider.getInstance();
+public class UserController extends AbstractController{
     UserService userService = new UserService();
 
-    public UserController() {
+    public UserController(String userToken) {
+        super(userToken);
         userService.setRepositoryProvider(rep);
     }
 
     public ViewModel show(String id) {
-        return userService.fillView(id);
+        ViewModel vm = userService.fillView(id);
+        vm.setUserToken(userToken);
+        return permissionService.applyPermissions(vm);
     }
 
     public ViewModel update(ViewModel viewModel) {
-        return userService.update(viewModel);
+        ViewModel vm = userService.update(viewModel);
+        vm.setUserToken(userToken);
+        return permissionService.applyPermissions(vm);
+    }
 
-    }
     public ViewModel add(String str) {
-        return userService.fillView("-1");
+        ViewModel vm = userService.fillView("-1");
+        vm.setUserToken(userToken);
+        return permissionService.applyPermissions(vm);
     }
+
     public ViewModel delete(ViewModel viewModel) {
 //        mock
         return viewModel;
     }
 
     public ViewModel getList(String param) {
-        return userService.getList();
+        ViewModel vm = userService.getList();
+        vm.setUserToken(userToken);
+        return permissionService.applyPermissions(vm);
     }
 }

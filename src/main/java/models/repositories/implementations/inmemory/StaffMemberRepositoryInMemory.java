@@ -14,11 +14,9 @@ public class StaffMemberRepositoryInMemory implements IStaffMemberRepository {
 
     @Override
     public void add(StaffMember staffMember) {
-        if (staffMembers != null && staffMembers.size() > 0) {
-            int maxIndex = staffMembers.stream().max(Comparator.comparing(r -> r.getStaffMemberId())).get().getStaffMemberId();
-            staffMember.setStaffMemberId(maxIndex + 1);
-        }
-        staffMember.setStaffMemberId(1);
+        int maxIndex = staffMembers.isEmpty() ? 0
+                : staffMembers.stream().max(Comparator.comparing(s -> s.getStaffMemberId())).get().getStaffMemberId();
+        staffMember.setUserId(maxIndex + 1);
         staffMembers.add(staffMember);
     }
 

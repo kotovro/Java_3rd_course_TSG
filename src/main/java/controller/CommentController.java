@@ -4,24 +4,30 @@ import models.repositories.RepositoryProvider;
 import services.*;
 import view.ViewModel;
 
-public class CommentController {
-    RepositoryProvider rep = RepositoryProvider.getInstance();
+public class CommentController extends AbstractController {
+
     CommentService service = new CommentService();
 
-    public CommentController() {
+    public CommentController(String userToken) {
+        super(userToken);
         service.setRepositoryProvider(rep);
     }
 
     public ViewModel show(String id) {
-        return service.fillView(id);
+        ViewModel vm = service.fillView(id);
+        vm.setUserToken(userToken);
+        return permissionService.applyPermissions(vm);
     }
 
     public ViewModel update(ViewModel viewModel) {
-        return service.update(viewModel);
-
+        ViewModel vm = service.update(viewModel);
+        vm.setUserToken(userToken);
+        return permissionService.applyPermissions(vm);
     }
     public ViewModel add(String requestId) {
-        return service.fillEmptyView(requestId);
+        ViewModel vm = service.fillEmptyView(requestId);
+        vm.setUserToken(userToken);
+        return permissionService.applyPermissions(vm);
     }
     public ViewModel delete(ViewModel viewModel) {
 //        mock

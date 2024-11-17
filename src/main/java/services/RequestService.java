@@ -101,6 +101,7 @@ public class RequestService  {
         }
         Action updateNew = requestActionProvider.getActionUpdate("-1", "", null, null);
         Action add = requestActionProvider.getActionAdd("-1", "Add new request", updateNew, null);
+        //add action backToMainMenu
         viewModel.getActionsList().add(add);
         Action exit = new Action();
         exit.setActionType(Action.ActionType.EXIT);

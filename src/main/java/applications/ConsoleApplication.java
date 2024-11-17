@@ -22,13 +22,16 @@ public class ConsoleApplication implements IApplication {
     @Override
     public void start(Action action, ControllerService controllerService) {
         ViewModel viewModel = null;
+        String usr = null;
         while (action.getActionType() != Action.ActionType.EXIT)
         {
+
             switch (action.getActionType())
             {
                 case SHOW:
                     try {
-                        viewModel = controllerService.doAction(action, null);
+                        viewModel = controllerService.doAction(action, null, usr);
+                        usr = viewModel.getUserToken();
                     } catch (RuntimeException e) {
                         throw new RuntimeException(e);
                     }
@@ -36,8 +39,8 @@ public class ConsoleApplication implements IApplication {
                     break;
                 case UPDATE:
                     updateContext(viewModel);
-                    viewModel = controllerService.doAction(action, viewModel);
-//                    DEFINITELY RESOLVE SHOW COMMAND DEPENDENCY!
+                    viewModel = controllerService.doAction(action, viewModel, usr);
+                    usr = viewModel.getUserToken();
                     if (viewModel.getErrorMessage() != null) {
                         if (action.getOnError() != null) {
                             action = action.getOnError();
@@ -49,9 +52,11 @@ public class ConsoleApplication implements IApplication {
                     }
                     break;
                 case ADD:
-                    viewModel = controllerService.doAction(action, null);
+                    viewModel = controllerService.doAction(action, null, usr);
+                    usr = viewModel.getUserToken();
                     updateContext(viewModel);
-                    viewModel = controllerService.doAction(action.getOnSuccess(), viewModel);
+                    viewModel = controllerService.doAction(action.getOnSuccess(), viewModel, usr);
+                    usr = viewModel.getUserToken();
                     action = display(viewModel);
                     break;
                 case DELETE:
@@ -63,21 +68,7 @@ public class ConsoleApplication implements IApplication {
         }
     }
 
-    private Action add(ViewModel viewModel) {
-        Scanner scanner = new Scanner(System.in);
-        for (ViewField field : viewModel.getParameters())
-        {
-            if (field.isChangeable())
-            {
-                System.out.print("Enter " + field.getAttributeName() + ": ");
-                String newFiledView = scanner.nextLine();
-                if (newFiledView.length() > 0) {
-                    field.setAttributeValue(newFiledView);
-                }
-            }
-        }
-        return new Action();
-    }
+
 
     private static void clearScreen() {
         for (int i = 0; i < 100; i++)

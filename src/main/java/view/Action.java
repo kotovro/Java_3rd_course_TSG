@@ -4,6 +4,9 @@ package view;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import models.entities.Permission;
+import models.entities.PermissionLevel;
+import models.entities.Permissions;
 
 @Getter
 @Setter
@@ -26,6 +29,8 @@ public class Action {
     private Action onSuccess = null;
     private Action onError = null;
     private boolean isInteractive = true;
+    private Permissions permissionId = null;
+    private PermissionLevel permissionLevel = null;
 
     public Action(ActionType actionType, String route, String parameter, String actionName) {
         this.actionType = actionType;
