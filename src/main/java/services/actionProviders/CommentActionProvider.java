@@ -35,8 +35,8 @@ public class CommentActionProvider implements IActionProvider {
     }
 
     @Override
-    public Action getActionDelete(String param, String name) {
+    public Action getActionDelete(String param, String name, Action onSuccess, Action onError) {
         return new Action(Action.ActionType.DELETE, "Comment/delete",
-                param, name);
+                param, name, onSuccess, onError, true, Permissions.COMMENT, PermissionLevel.ADD_NEW);
     }
 }

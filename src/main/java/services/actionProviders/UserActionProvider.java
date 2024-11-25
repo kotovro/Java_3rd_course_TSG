@@ -40,7 +40,7 @@ public class UserActionProvider implements IActionProvider {
     }
 
     @Override
-    public Action getActionDelete(String param, String name) {
+    public Action getActionDelete(String param, String name, Action onSuccess, Action onError) {
         return new Action(Action.ActionType.DELETE, "User/delete",
                 param, name, null, null, true, Permissions.USER, PermissionLevel.FULL_RIGHTS);
     }

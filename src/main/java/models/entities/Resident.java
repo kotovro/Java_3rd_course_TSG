@@ -11,13 +11,13 @@ import lombok.Setter;
 @EqualsAndHashCode
 public class Resident {
 
-    private int residentId;
-    private int userId;
-    private String name;
-    private String surname;
-    private boolean isActive;
-    private String homeNumber;
-    private String streetName;
+    private int residentId = -1;
+    private int userId = -1;
+    private String name = "";
+    private String surname = "";
+    private boolean isActive = true;
+    private String homeNumber = "";
+    private String streetName = "";
 
     public void updateFromObject(Resident resident) {
         this.setStreetName(resident.getStreetName());

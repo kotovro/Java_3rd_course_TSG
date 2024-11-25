@@ -23,8 +23,6 @@ public class CommentService {
     public ViewModel fillEmptyView(String requestId) {
         ViewModel commentMdlView = new ViewModel();
 
-        Comment comment = new Comment(Integer.parseInt(requestId));
-
         List<ViewField> parameters = commentMdlView.getParameters();
         parameters.add(new ViewField("Comment Id", "-1", false, false));
         parameters.add(new ViewField("Request Id", requestId, false, false));
@@ -74,14 +72,16 @@ public class CommentService {
                     "Add new comment", update, update);
         commentMdlView.addCommand(add);
 
-        Action delete = commentActionProvider.getActionDelete(commentIdStr, "Delete");
+        Action showComments = commentActionProvider.getActionList(Integer.toString(requestId), "Show other comments", null, null);
+
+        Action delete = commentActionProvider.getActionDelete(commentIdStr, "Delete", showComments, showComments);
         commentMdlView.addCommand(delete);
 
         IActionProvider requestActionProvider = ActionProviderContainer.getRequestActionProvider();
         Action back = requestActionProvider.getActionBack(Integer.toString(requestId), "Back to request");
         commentMdlView.addCommand(back);
 
-        Action showComments = commentActionProvider.getActionList(Integer.toString(requestId), "Show other comments", null, null);
+
         commentMdlView.addCommand(showComments);
 
         Action exit = new Action();

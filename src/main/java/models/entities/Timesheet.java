@@ -11,6 +11,6 @@ import lombok.Setter;
 @AllArgsConstructor
 @EqualsAndHashCode
 public class Timesheet {
-    private int timesheetId;
-    private int staffMemberId;
+    private int timesheetId = -1;
+    private int staffMemberId = -1;
 }

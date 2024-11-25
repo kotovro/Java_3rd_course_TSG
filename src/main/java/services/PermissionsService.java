@@ -21,13 +21,18 @@ public class PermissionsService {
         IUserRepository userRep = repositoryProvider.getUserRepository();
         User user = userRep.getUserByToken(vm.getUserToken());
 
+        if (user.getRoles().isEmpty()) {
+            return vm;
+        }
         IRoleRepository roleRep = repositoryProvider.getRoleRepository();
         List<Permission> currentUserPermissions = new LinkedList<>();
         List<Action> availableActions = new LinkedList<>();
         for (int role : user.getRoles()) {
             Role rl = roleRep
                     .getRoleById(role);
-            currentUserPermissions.addAll(rl.getPermissions());
+            if (!rl.getPermissions().isEmpty()) {
+                currentUserPermissions.addAll(rl.getPermissions());
+            }
         }
 
         List<Permission> maxUserPermissions = new LinkedList<>();

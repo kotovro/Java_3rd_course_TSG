@@ -34,7 +34,7 @@ public class LoginActionProvider implements IActionProvider {
     }
 
     @Override
-    public Action getActionDelete(String param, String name) {
+    public Action getActionDelete(String param, String name, Action onSuccess, Action onError) {
         return null;
     }
 }

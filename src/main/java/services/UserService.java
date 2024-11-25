@@ -12,6 +12,7 @@ import models.repositories.interfaces.IStaffMemberRepository;
 import models.repositories.interfaces.IUserRepository;
 import services.actionProviders.ActionProviderContainer;
 import services.actionProviders.IActionProvider;
+import services.actionProviders.RoleActionProvider;
 import view.Action;
 import view.ViewField;
 import view.ViewModel;
@@ -51,20 +52,22 @@ public class UserService {
 
         List<ViewField> parameters = vm.getParameters();
         parameters.add(new ViewField("User Id", userIdStr, false, false));
-        parameters.add(new ViewField("Login", user.getLogin(), true, true));
-        parameters.add(new ViewField("Password", user.getPassword(), true, true));
+        parameters.add(new ViewField("Login", user.getLogin(), true, false));
+        parameters.add(new ViewField("Password", user.getPassword(), true, false));
 
         IActionProvider userActionProvider = ActionProviderContainer.getUserActionProvider();
         Action show = userActionProvider.getActionShow(userIdStr, "", null, null, false);
         Action back = userActionProvider.getActionBack("", "Back to users list");
         Action update = userActionProvider.getActionUpdate(userIdStr, "Update user", show, show);
+//        Action addRole = ActionProviderContainer.getRoleActionProvider().getActionAdd("-1", "Add role", update, null);
         vm.addCommand(update);
+//        vm.addCommand(addRole);
 
         if (userId > 0) {
             Action add = userActionProvider.getActionAdd("", "Add", update, update);
             vm.addCommand(add);
 
-            Action delete = userActionProvider.getActionDelete(userIdStr, "Delete");
+            Action delete = userActionProvider.getActionDelete(userIdStr, "Delete", back, back);
             vm.addCommand(delete);
         }
 

@@ -8,6 +8,7 @@ import models.repositories.interfaces.IRequestRepository;
 
 import java.time.ZonedDateTime;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -21,7 +22,7 @@ public class RequestRepositoryInMemory implements IRequestRepository {
     public int add(Request request) {
         int maxIndex = requests.size() == 0 ? 0
                 : requests.stream().max(Comparator.comparing(r -> r.getRequestId())).get().getRequestId();
-        request.setTime(ZonedDateTime.now());
+        request.setTime(Date.from(ZonedDateTime.now().toInstant()));
         request.setRequestId(maxIndex + 1);
         requests.add(request);
         return maxIndex + 1;

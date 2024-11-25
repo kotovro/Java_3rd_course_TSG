@@ -38,8 +38,8 @@ public class RoleActionProvider implements IActionProvider {
     }
 
     @Override
-    public Action getActionDelete(String param, String name) {
+    public Action getActionDelete(String param, String name, Action onSuccess, Action onError) {
         return new Action(Action.ActionType.DELETE, "Role/delete",
-                param, name);
+                param, name, onSuccess, onError, false, Permissions.ROLE, PermissionLevel.ADD_NEW);
     }
 }

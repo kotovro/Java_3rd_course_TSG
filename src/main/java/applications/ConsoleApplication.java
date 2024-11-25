@@ -60,7 +60,9 @@ public class ConsoleApplication implements IApplication {
                     action = display(viewModel);
                     break;
                 case DELETE:
-//                    action = deleteContext();
+                    viewModel = controllerService.doAction(action, viewModel, usr);
+                    usr = viewModel.getUserToken();
+                    action = action.getOnSuccess();
                     break;
 
             }
@@ -137,7 +139,8 @@ public class ConsoleApplication implements IApplication {
     }
 
     private static void showMenu(ViewModel viewModel) {
-        System.out.println("Mock -------------");
+
+//        System.out.println();
     }
 
 

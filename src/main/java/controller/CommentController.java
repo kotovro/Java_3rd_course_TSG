@@ -30,8 +30,8 @@ public class CommentController extends AbstractController {
         return permissionService.applyPermissions(vm);
     }
     public ViewModel delete(ViewModel viewModel) {
-//        mock
-        return viewModel;
+        service.delete(viewModel.getFieldValueByAttributeName("Comment Id"));
+        return service.getList(viewModel.getFieldValueByAttributeName("Request Id"));
     }
 
     public ViewModel getList(String requestId) {

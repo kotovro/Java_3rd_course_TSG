@@ -1,14 +1,23 @@
+import applications.ConsoleApplication;
+import applications.IApplication;
+import controller.ControllerService;
 import models.entities.*;
 import models.repositories.interfaces.*;
 import models.repositories.RepositoryProvider;
 import services.*;
-import services.actionProviders.*;
+import services.actionProviders.CommentActionProvider;
+import services.actionProviders.IActionProvider;
+import services.actionProviders.LoginActionProvider;
+import services.actionProviders.RequestActionProvider;
+import services.actionProviders.RoleActionProvider;
+import services.actionProviders.UserActionProvider;
+import services.actionProviders.ActionProviderContainer;
+import services.actionProviders.PermissionActionProvider;
+
 import view.Action;
-import controller.ControllerService;
-import applications.IApplication;
-import applications.ConsoleApplication;
 
 import java.time.ZonedDateTime;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -16,7 +25,7 @@ public class Main {
     private static void fillRepositoriesWithTestData(RepositoryProvider repProvider){
 
         ICommentRepository commentRepository =  repProvider.getCommentRepository();
-        commentRepository.add(new Comment(1, 1, 1, "s", ZonedDateTime.now(), "NOPE"));
+        commentRepository.add(new Comment(1, 1, 1, RequestState.STARTED, Date.from(ZonedDateTime.now().toInstant()), "NOPE"));
 
         IRoleRepository roleRepository =  repProvider.getRoleRepository();
         Permission p = new Permission();
@@ -71,17 +80,89 @@ public class Main {
         IResidentRepository residentRepository = repProvider.getResidentRepository();
         residentRepository.add(new Resident(1, 1, "Saaas", "Sooos", true, "19A", "Test"));
         IRequestRepository requestRepository = repProvider.getRequestRepository();
-        requestRepository.add(new Request(1, RequestType.COLLECTIVE, RequestState.STOPPED, "Somethong's wrong", 1, 1,  ZonedDateTime.now(), false));
+        requestRepository.add(new Request(1, RequestType.COLLECTIVE, RequestState.STOPPED, "Somethong's wrong", 1, 1,  Date.from(ZonedDateTime.now().toInstant()), false));
 
     }
 
-    public static void main(String[] args){
+    public static void testConnection(ConfigRepository configRep) {
+        String url = configRep.getPropertyValue("db.url");
+        String username = configRep.getPropertyValue("db.username");
+        String password = configRep.getPropertyValue("db.password");
+        RepositoryProvider.init(configRep);
+//        IResidentRepository residentRep = RepositoryProvider.getInstance().getResidentRepository();
+//        Resident res = new Resident(2, 2, "Saaas", "Sooos", true, "19A", "Test");
+//        residentRep.add(res);
+        IUserRepository userRepository = RepositoryProvider.getInstance().getUserRepository();
+        User user = userRepository.getUserById(8);
+        userRepository.authenticate("test", "test");
 
-        RequestService rc = new RequestService();
-        System.out.println(rc.getClass());
-        System.out.println(rc.getClass());
-        RepositoryProvider repoProv = RepositoryProvider.init(RepositoryProvider.RepositoryType.IN_MEMORY);
-        fillRepositoriesWithTestData(repoProv);
+        System.out.print(user.getUserId());
+//        IRoleRepository roleRepository = RepositoryProvider.getInstance().getRoleRepository();
+//        LinkedList<Permission> permissions = new LinkedList<>();
+//        Permission permission1 = new Permission();
+//        permission1.setId(Permissions.USER);
+//        permission1.setLevel(PermissionLevel.FULL_RIGHTS);
+//        Permission permission2 = new Permission();
+//        permission2.setId(Permissions.COMMENT);
+//        permission2.setLevel(PermissionLevel.FULL_RIGHTS);
+//        Permission permission3 = new Permission();
+//        permission3.setId(Permissions.REQUEST);
+//        permission3.setLevel(PermissionLevel.FULL_RIGHTS);
+//        Permission permission4 = new Permission();
+//        permission4.setId(Permissions.ROLE);
+//        permission4.setLevel(PermissionLevel.FULL_RIGHTS);
+//
+//        permissions.add(permission1);
+//        permissions.add(permission2);
+//        permissions.add(permission3);
+//        permissions.add(permission4);
+//        Role role = new Role(2, "Admin", permissions);
+//        roleRepository.addRole(role);
+//        Connection connection = null;
+//        try {
+//            connection = DriverManager.getConnection(url,
+//                    username, password);
+//
+//            PreparedStatement preparedStatement = null;
+//            try {
+//                User usr =new User();
+//                usr.setLogin("test");
+//                usr.setPassword("test");
+//
+//                preparedStatement = connection.prepareStatement("insert into \"user\" (login, password, pssword_salt, active) values (?, ?, ?, ?)");
+//                preparedStatement.setString(1, "test");
+//
+//                ResultSet resultSet = preparedStatement.executeQuery();
+//                while (resultSet.next()) {
+//                    System.out.println(resultSet.getString("login"));
+//                }
+//            } catch (SQLException e) {
+//                    throw new RuntimeException(e);
+//            } finally {
+//                preparedStatement.close();
+//            }
+//        } catch (Exception e) {
+//            if (connection != null) {
+//                try {
+//                    connection.close();
+//                } catch (SQLException ex) {}
+//            }
+//        }
+    }
+
+    public static void main(String[] args){
+        ConfigRepository configRep = ConfigRepository.getInstance("C:\\VSU courses\\MaintanenceCompany\\config.txt");
+//        testConnection(configRep);
+//        return;
+
+        RepositoryProvider repProvider = RepositoryProvider.init(configRep);
+        if (configRep.getPropertyValue("repository_type").equals("IN_MEMORY")) {
+            fillRepositoriesWithTestData(repProvider);
+        }
+
+//        RequestService rc = new RequestService();
+//        System.out.println(rc.getClass());
+//        System.out.println(rc.getClass());
 
         IApplication application = new ConsoleApplication();
         ControllerService controllerService = new ControllerService();

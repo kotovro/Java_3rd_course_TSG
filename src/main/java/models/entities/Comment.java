@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.ZonedDateTime;
+import java.util.Date;
 
 @Getter
 @Setter
@@ -13,10 +14,10 @@ import java.time.ZonedDateTime;
 @EqualsAndHashCode
 public class Comment {
     private int commentId = -1;
-    private int authorId;
-    private int requestId;
-    private String state;
-    private ZonedDateTime time;
+    private int authorId = -1;
+    private int requestId = 0;
+    private RequestState state = null;
+    private Date time;
     private String body;
 //    private boolean ;
 

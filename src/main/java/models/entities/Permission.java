@@ -8,5 +8,5 @@ import lombok.Setter;
 @Setter
 public class Permission {
     private Permissions id;
-    private PermissionLevel level;
+    private PermissionLevel level = PermissionLevel.NOT_ACCESSIBLE;
 }

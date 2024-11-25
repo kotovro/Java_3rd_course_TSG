@@ -5,6 +5,8 @@ package models.repositories;
 import lombok.Getter;
 import models.repositories.implementations.inmemory.*;
 import models.repositories.interfaces.*;
+import models.repositories.sql.*;
+import services.ConfigRepository;
 
 @Getter
 public class RepositoryProvider {
@@ -16,30 +18,27 @@ public class RepositoryProvider {
     private  IStaffMemberRepository staffMemberRepository;
     private ITimesheetRepository timesheetRepository;
     private IRoleRepository roleRepository;
-    private IPermissionsRepository permissionRepository;
-    private RepositoryType repositoryType;
+    private  RepositoryType repositoryType;
+
 
     public enum RepositoryType {
-        IN_MEMORY;
+        IN_MEMORY,
+        IN_DATABASE
     }
     @Getter
     private static RepositoryProvider instance = null;
 
-    public static RepositoryProvider init(RepositoryType type)
+    public static RepositoryProvider init(ConfigRepository config)
     {
         if (instance == null)
         {
-            instance = new RepositoryProvider(type);
-        }
-        else if (type != RepositoryType.IN_MEMORY)
-        {
-            throw new RuntimeException("RepositoryProvider is already inited with another Type");
+            instance = new RepositoryProvider(config);
         }
         return instance;
     }
 
-    private RepositoryProvider(RepositoryType type) {
-        this.repositoryType = type;
+    private RepositoryProvider(ConfigRepository config) {
+        this.repositoryType = RepositoryType.valueOf(config.getPropertyValue("repository_type"));
         if (repositoryType == RepositoryType.IN_MEMORY)
         {
             this.commentRepository = new CommentRepositoryInMemory();
@@ -50,9 +49,19 @@ public class RepositoryProvider {
             this.timesheetRepository = new TimesheetRepositoryInMemory();
             this.requestRepository = new RequestRepositoryInMemory();
             this.roleRepository = new RoleRepositoryInMemory();
-            this.permissionRepository = new PermissionRepositoryInMemory();
 //            this.invoiceRepository = new InvoiceRepositoryInMemory();
-
+        } else if (repositoryType == RepositoryType.IN_DATABASE)
+        {
+            String url = config.getPropertyValue("db.url");
+            String username = config.getPropertyValue("db.username");
+            String password = config.getPropertyValue("db.password");
+            this.commentRepository = new CommentRepositorySQl(url, username, password);
+            this.userRepository = new UserRepositorySQL(url, username, password);
+            this.commentRepository = new CommentRepositorySQl(url, username, password);
+            this.roleRepository = new RoleRepositorySQL(url, username, password);
+            this.requestRepository = new RequestRepositorySQl(url, username, password);
+            this.staffMemberRepository = new StaffMemberRepositorySQL(url, username, password);
+            this.residentRepository = new ResidentRepositorySQL(url, username, password);
         }
     }
 

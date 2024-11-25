@@ -1,5 +1,6 @@
 package services.actionProviders;
 
+import com.sun.net.httpserver.Authenticator;
 import models.entities.PermissionLevel;
 import models.entities.Permissions;
 import view.Action;
@@ -34,7 +35,7 @@ public class PermissionActionProvider implements IActionProvider {
     }
 
     @Override
-    public Action getActionDelete(String param, String name) {
+    public Action getActionDelete(String param, String name, Action onSuccess, Action onError) {
         return null;
     }
 }

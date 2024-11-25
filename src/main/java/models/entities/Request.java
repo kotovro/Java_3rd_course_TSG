@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.ZonedDateTime;
+import java.util.Date;
 
 @Getter
 @Setter
@@ -18,7 +19,7 @@ public class Request {
     private String description;
     private int authorId = -1;
     private int residentId = -1;
-    private ZonedDateTime time = ZonedDateTime.now();
+    private Date time = Date.from(ZonedDateTime.now().toInstant());
     private boolean isDeleted = false;
 
 

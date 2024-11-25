@@ -60,7 +60,7 @@ public class RoleService {
             Action add = roleActionProvider.getActionAdd("", "Add", update, update);
             vm.addCommand(add);
 
-            Action delete = roleActionProvider.getActionDelete(roleIdStr, "Delete");
+            Action delete = roleActionProvider.getActionDelete(roleIdStr, "Delete", back, back);
             vm.addCommand(delete);
 
         }
@@ -103,7 +103,7 @@ public class RoleService {
         } else {
             role = rep.getRoleById(id);
         }
-        role.setName(viewModel.getFieldValueByAttributeName("Role Name"));
+        role.setName(viewModel.getFieldValueByAttributeName("Role name"));
         id = rep.updateRole(role);
 
         return fillView(Integer.toString(id));

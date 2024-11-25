@@ -9,5 +9,5 @@ public interface IActionProvider {
     Action getActionUpdate(String param, String name, view.Action onSuccess, view.Action onError);
     Action getActionBack(String param, String name);
     Action getActionAdd(String param, String name, view.Action onSuccess, view.Action onError);
-    Action getActionDelete(String param, String name);
+    Action getActionDelete(String param, String name, Action onSuccess, view.Action onError);
 }

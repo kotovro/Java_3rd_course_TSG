@@ -10,11 +10,11 @@ import lombok.Setter;
 @AllArgsConstructor
 @EqualsAndHashCode
 public class StaffMember {
-    private int staffMemberId;
-    private int userId;
-    private String name;
-    private String surname;
-    private boolean isActive;
+    private int staffMemberId = -1;
+    private int userId = -1;
+    private String name = "";
+    private String surname = "";
+    private boolean isActive = false;
 
     public void updateFromObject(StaffMember staffMember) {
         this.setName(staffMember.getName());

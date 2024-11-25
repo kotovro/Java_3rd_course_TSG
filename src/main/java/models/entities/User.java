@@ -14,9 +14,9 @@ import java.util.List;
 @EqualsAndHashCode
 public class User {
     private int userId = -1;
-    private String login;
-    private String password;
-    private byte[] passwordSalt;
+    private String login = "";
+    private String password = "";
+    private byte[] passwordSalt = new byte[16];
     private List<Integer> roles = new LinkedList<>();
 
     public User() {

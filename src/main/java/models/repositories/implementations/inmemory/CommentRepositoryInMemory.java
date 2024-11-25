@@ -5,6 +5,7 @@ import models.repositories.interfaces.ICommentRepository;
 
 import java.time.ZonedDateTime;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -17,7 +18,7 @@ public class CommentRepositoryInMemory implements ICommentRepository {
     public int add(Comment comment) {
         int maxIndex = comments.size() == 0 ? 0
                 : comments.stream().max(Comparator.comparing(r -> r.getCommentId())).get().getCommentId();
-        comment.setTime(ZonedDateTime.now());
+        comment.setTime(Date.from(ZonedDateTime.now().toInstant()));
         comment.setCommentId(maxIndex + 1);
         comments.add(comment);
         return maxIndex + 1;

@@ -71,7 +71,7 @@ public class RequestService  {
             Action add = requestActionProvider.getActionAdd("", "Add", update, update);
             requestMdlView.addCommand(add);
 
-            Action delete = requestActionProvider.getActionDelete(requestIdStr, "Delete");
+            Action delete = requestActionProvider.getActionDelete(requestIdStr, "Delete", back, back);
             requestMdlView.addCommand(delete);
 
             IActionProvider commentActionProvider = ActionProviderContainer.getCommentActionProvider();

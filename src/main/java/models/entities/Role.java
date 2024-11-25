@@ -4,15 +4,17 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 @Getter
 @Setter
 @AllArgsConstructor
 public class Role {
-    private int id;
-    private String name;
-    private List<Permission> permissions;
+    private int id = -1;
+    private String name = "";
+    private List<Permission> permissions = new LinkedList<>();
 
     public Role() {}
 //    public Role(List<Permissions> permissions) {

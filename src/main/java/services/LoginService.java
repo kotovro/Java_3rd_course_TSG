@@ -72,6 +72,10 @@ public class LoginService {
         User usr = rep.authenticate(login, password);
         if (usr == null) {
             viewModel.setErrorMessage("Invalid login or password");
+            List<ViewField> list = viewModel.getParameters();
+            for (ViewField viewField : list) {
+                viewField.setAttributeValue("");
+            }
             return viewModel;
         }
         viewModel.setErrorMessage(null);
