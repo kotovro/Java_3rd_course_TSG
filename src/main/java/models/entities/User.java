@@ -13,11 +13,13 @@ import java.util.List;
 @AllArgsConstructor
 @EqualsAndHashCode
 public class User {
-    private int userId = -1;
-    private String login = "";
-    private String password = "";
+    private int userId;
+    private String login;
+    private String password;
+    private boolean active = true;
     private byte[] passwordSalt = new byte[16];
     private List<Integer> roles = new LinkedList<>();
+
 
     public User() {
     }
@@ -25,6 +27,7 @@ public class User {
     public void updateFromObject(User user) {
         this.setLogin(user.getLogin());
         this.setPassword(user.getPassword());
+        this.setActive(user.isActive());
         this.setPasswordSalt(user.getPasswordSalt());
         this.setRoles(user.getRoles());
     }

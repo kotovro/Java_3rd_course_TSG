@@ -134,35 +134,41 @@ public class UserRepositorySQL extends PostgreDBRepository implements IDataBaseC
     @Override
     public User authenticate(String login, String password) {
         Connection connection = getConnection(this.url, this.username, this.password);
-        if (connection == null) return null;
+        User usr = new User();
+        if (connection == null) {
+            return usr;
+        }
+
         PreparedStatement statement = null;
-        User usr = null;
         try {
             statement = connection.prepareStatement("select * from \"user\" where \"user\".login=? ");
             statement.setString(1, login);
             ResultSet resultSet = statement.executeQuery();
             if (!resultSet.next()) {
-                return null;
+                return usr;
             }
 
             String userPassword = resultSet.getString("password");
             byte[] salt = resultSet.getBytes("password_salt");
             String hash = hashPassword(password, salt);
             if (hash.equals(userPassword)) {
-                usr = new User();
                 usr.setUserId(resultSet.getInt("user_id"));
                 usr.setLogin(resultSet.getString("login"));
                 usr.setPassword(resultSet.getString("password"));
                 usr.setPasswordSalt(resultSet.getBytes("password_salt"));
+                PreparedStatement statementForRoles = connection.prepareStatement("select role_id from \"user_role\" where user_id=?");
+                statementForRoles.setInt(1, usr.getUserId());
+                ResultSet resultSetForRoles = statementForRoles.executeQuery();
                 usr.setRoles(new LinkedList<>());
                 List<Integer> userRoles = new LinkedList<>();
-                userRoles.add((resultSet.getInt("role_id")));
-                while (resultSet.next()) {
-                    userRoles.add((resultSet.getInt("role_id")));
+                while (resultSetForRoles.next()) {
+                    userRoles.add((resultSetForRoles.getInt("role_id")));
                 }
+                resultSetForRoles.close();
                 usr.setRoles(userRoles);
             }
         } catch (Exception e) {
+            return usr;
 
         } finally {
             closeConnection(connection, statement);
@@ -197,7 +203,18 @@ public class UserRepositorySQL extends PostgreDBRepository implements IDataBaseC
 
     @Override
     public void deleteUser(int userId) {
+        Connection connection = getConnection(url, username, password);
+        if (connection == null) return;
+        PreparedStatement statement = null;
+        try {
+            statement = connection.prepareStatement("update \"user\" set active=false where user_id=?");
+            statement.setInt(1, userId);
+            statement.executeUpdate();
+        } catch (Exception e) {
 
+        } finally {
+            closeConnection(connection, statement);
+        }
     }
     private int getUserIdFromToken(String token) {
         return Integer.parseInt(token);
@@ -227,7 +244,7 @@ public class UserRepositorySQL extends PostgreDBRepository implements IDataBaseC
         PreparedStatement statement = null;
         List<User> userList = new LinkedList<>();
         try {
-            statement = connection.prepareStatement("select * from \"user\" ");
+            statement = connection.prepareStatement("select * from \"user\" where active=true");
             ResultSet resultSet;
             try {
                 resultSet = statement.executeQuery();
