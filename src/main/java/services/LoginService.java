@@ -70,11 +70,11 @@ public class LoginService {
         String password = viewModel.getFieldValueByAttributeName("Password");
         IUserRepository rep = repositoryProvider.getUserRepository();
         User usr = rep.authenticate(login, password);
-        if (usr == null) {
+        if (usr.getLogin() == null) {
             viewModel.setErrorMessage("Invalid login or password");
             List<ViewField> list = viewModel.getParameters();
             for (ViewField viewField : list) {
-                viewField.setAttributeValue("");
+                viewField.setAttributeValue(null);
             }
             return viewModel;
         }

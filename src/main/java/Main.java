@@ -76,7 +76,7 @@ public class Main {
         rolesIds.add(1);
 
         IUserRepository userRepository = repProvider.getUserRepository();
-        userRepository.add(new User(1, "test", "HnO6qrPRkmsVkONr/TOUvQ==", new byte[]{83, 59, 110, 125, 48, 77, 18, 99, -18, -69, -67, -103, -67, 44, 124, -61}, rolesIds));
+        userRepository.add(new User(1, "test", "HnO6qrPRkmsVkONr/TOUvQ==", true, new byte[]{83, 59, 110, 125, 48, 77, 18, 99, -18, -69, -67, -103, -67, 44, 124, -61}, rolesIds));
         IResidentRepository residentRepository = repProvider.getResidentRepository();
         residentRepository.add(new Resident(1, 1, "Saaas", "Sooos", true, "19A", "Test"));
         IRequestRepository requestRepository = repProvider.getRequestRepository();

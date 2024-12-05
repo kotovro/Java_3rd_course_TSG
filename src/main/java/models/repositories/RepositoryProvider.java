@@ -3,7 +3,7 @@ package models.repositories;
 
 
 import lombok.Getter;
-import models.repositories.implementations.inmemory.*;
+import models.repositories.inmemory.*;
 import models.repositories.interfaces.*;
 import models.repositories.sql.*;
 import services.ConfigRepository;
