@@ -43,6 +43,7 @@ public class LoginService {
 //        Action add = requestActionProvider.getActionAdd("-1", "Add new request", updateNew, null);
 //        viewModel.getActionsList().add(add);
         Action exit = new Action();
+        exit.setActionName("Exit");
         exit.setActionType(Action.ActionType.EXIT);
         viewModel.getActionsList().add(exit);
         return viewModel;
@@ -55,8 +56,8 @@ public class LoginService {
         parameters.add(new ViewField("Login", "", true, true));
         parameters.add(new ViewField("Password", "", true, true));
 
-        Action landing = ActionProviderContainer.getLoginActionProvider().getActionList("", "", null, null);
-        Action update = ActionProviderContainer.getLoginActionProvider().getActionUpdate("", "Enter login and password", landing, null);
+        Action onSuccess = ActionProviderContainer.getLoginActionProvider().getActionList("", "", null, null);
+        Action update = ActionProviderContainer.getLoginActionProvider().getActionUpdate("", "Enter login and password", onSuccess, null);
         vm.addCommand(update);
 
         Action exit = new Action();

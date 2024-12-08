@@ -97,6 +97,7 @@ public class RequestService  {
         for (Request request : reqList)
         {
             Action action = requestActionProvider.getActionShow( Integer.toString(request.getRequestId()), "Request " + request.getRequestId() + "\n", null, null, true);
+            action.setListItem(true);
             viewModel.getActionsList().add(action);
         }
         Action updateNew = requestActionProvider.getActionUpdate("-1", "", null, null);

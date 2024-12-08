@@ -7,6 +7,7 @@
     <groupId>org.example</groupId>
     <artifactId>MaintanenceCompany</artifactId>
     <version>1.0-SNAPSHOT</version>
+    <packaging>war</packaging>
 
     <properties>
         <maven.compiler.source>18</maven.compiler.source>
@@ -27,24 +28,98 @@
             <artifactId>postgresql</artifactId>
             <version>42.7.4</version>
         </dependency>
+
+        <dependency>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+            <version>5.0.0</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
+
     <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>3.4.2</version>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <addClasspath>true</addClasspath>
-                            <classpathPrefix>lib</classpathPrefix>
-                            <mainClass>Main</mainClass>
-                        </manifest>
-                    </archive>
-                </configuration>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
+<!--                <configuration>-->
+<!--                    <source>14</source>-->
+<!--                    <target>14</target>-->
+<!--                </configuration>-->
             </plugin>
-        </plugins>
-    </build>
+<!--            <plugin>-->
+<!--                <groupId>org.apache.maven.plugins</groupId>-->
+<!--                <artifactId>maven-war-plugin</artifactId>-->
+<!--                <version>3.3.1</version>-->
+<!--&lt;!&ndash;                <configuration>&ndash;&gt;-->
+<!--&lt;!&ndash;                    <archiveClasses>false</archiveClasses>&ndash;&gt;-->
+<!--&lt;!&ndash;                    <webXml>src/main/web/WEB-INF/web.xml</webXml>&ndash;&gt;-->
 
+<!--&lt;!&ndash;                    <webResources>&ndash;&gt;-->
+<!--&lt;!&ndash;                        <resource>&ndash;&gt;-->
+<!--&lt;!&ndash;                            <directory>/src/main/web/WEB-INF</directory>&ndash;&gt;-->
+<!--&lt;!&ndash;                            <includes>&ndash;&gt;-->
+<!--&lt;!&ndash;                                <include>*.xml</include>&ndash;&gt;-->
+<!--&lt;!&ndash;                            </includes>&ndash;&gt;-->
+<!--&lt;!&ndash;                            <targetPath>WEB-INF</targetPath>&ndash;&gt;-->
+<!--&lt;!&ndash;                        </resource>&ndash;&gt;-->
+<!--&lt;!&ndash;                    </webResources>&ndash;&gt;-->
+
+<!--&lt;!&ndash;                    <webappDirectory>out/artifacts</webappDirectory>&ndash;&gt;-->
+<!--&lt;!&ndash;                    <packagingExcludes>WEB-INF/lib/*.jar</packagingExcludes>&ndash;&gt;-->
+
+<!--&lt;!&ndash;                    <overlays>&ndash;&gt;-->
+<!--&lt;!&ndash;                        <overlay>&ndash;&gt;-->
+<!--&lt;!&ndash;                            <excludes>&ndash;&gt;-->
+<!--&lt;!&ndash;                                <exclude>**/web.xml</exclude>&ndash;&gt;-->
+<!--&lt;!&ndash;                            </excludes>&ndash;&gt;-->
+<!--&lt;!&ndash;                        </overlay>&ndash;&gt;-->
+<!--&lt;!&ndash;                    </overlays>&ndash;&gt;-->
+<!--&lt;!&ndash;                </configuration>&ndash;&gt;-->
+<!--            </plugin>-->
+<!--            <plugin>-->
+<!--                <groupId>org.apache.maven.plugins</groupId>-->
+<!--                <artifactId>maven-jar-plugin</artifactId>-->
+<!--                <version>3.4.2</version>-->
+<!--                <configuration>-->
+<!--                    <archive>-->
+<!--                        <manifest>-->
+<!--                            <addClasspath>true</addClasspath>-->
+<!--                            <classpathPrefix>lib</classpathPrefix>-->
+<!--                            <mainClass>Main</mainClass>-->
+<!--                        </manifest>-->
+<!--                    </archive>-->
+<!--                </configuration>-->
+<!--            </plugin>-->
+<!--            <plugin>-->
+<!--                <groupId>org.apache.maven.plugins</groupId>-->
+<!--                <artifactId>maven-assembly-plugin</artifactId>-->
+<!--                <version>3.2.0</version>-->
+<!--                <configuration>-->
+<!--                <archive>-->
+<!--                    <manifest>-->
+<!--                        <mainClass>src/main/java/Main</mainClass>>-->
+<!--                    </manifest>-->
+<!--                </archive>-->
+<!--                </configuration>-->
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <id>make-assembly</id>-->
+<!--                        <goals>-->
+<!--                            <goal>single</goal>-->
+<!--                        </goals>-->
+<!--                    </execution>-->
+<!--                </executions>-->
+<!--            </plugin>-->
+        </plugins>
+
+    </build>
+    <repositories>
+        <repository>
+            <id>maven_central</id>
+            <name>Maven Central</name>
+            <url>https://repo.maven.apache.org/maven2/</url>
+        </repository>
+    </repositories>
 </project>

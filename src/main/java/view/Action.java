@@ -31,6 +31,7 @@ public class Action {
     private boolean isInteractive = true;
     private Permissions permissionId = null;
     private PermissionLevel permissionLevel = null;
+    private boolean isListItem = false;
 
     public Action(ActionType actionType, String route, String parameter, String actionName) {
         this.actionType = actionType;
@@ -38,5 +39,18 @@ public class Action {
         this.parameter = parameter;
         this.actionName = actionName;
     }
+
+    public Action(ActionType actionType, String route, String parameter, String actionName, Action onSuccess, Action onError, boolean isInteractive, Permissions permissionId, PermissionLevel permissionLevel) {
+        this.actionType = actionType;
+        this.route = route;
+        this.parameter = parameter;
+        this.actionName = actionName;
+        this.permissionId = permissionId;
+        this.permissionLevel = permissionLevel;
+        this.isInteractive = isInteractive;
+        this.onSuccess = onSuccess;
+        this.onError = onError;
+    }
+
     public Action() {}
 }
