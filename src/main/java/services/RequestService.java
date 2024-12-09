@@ -55,10 +55,13 @@ public class RequestService  {
         parameters.add(new ViewField("Description", request.getDescription(), true, true));
         parameters.add(new ViewField("Author Id", Integer.toString(request.getAuthorId()), true, false));
         parameters.add(new ViewField("Author", authorName, false, true));
-        parameters.add(new ViewField("Resident Id", Integer.toString(request.getResidentId()), true, false));
-        parameters.add(new ViewField("Resident", residentName, false, true));
-        parameters.add(new ViewField("Type", request.getType().toString(), true, true));
-        parameters.add(new ViewField("Status", request.getState().toString(), true, true));
+        ViewField resident = new ViewField("Resident Id", Integer.toString(request.getResidentId()), true, false);
+        parameters.add(resident);
+        parameters.add(new ViewField("Resident", residentName, false, true, resident, true, ListRouteProvider.getRoute(RouteType.RESIDENT)));
+        ViewField type = new ViewField("Type", request.getType().toString(), true, false);
+        parameters.add(new ViewField("Request Type", request.getType().toString(), false, true, type, true, ListRouteProvider.getRoute(RouteType.TYPE)));
+        ViewField status = new ViewField("Status", request.getType().toString(), true, false);
+        parameters.add(new ViewField("Request Status", request.getState().toString(), false, true, status, true, ListRouteProvider.getRoute(RouteType.STATUS)));
         parameters.add(new ViewField("Date", request.getTime().toString(), false, true));
 
         IActionProvider requestActionProvider = ActionProviderContainer.getRequestActionProvider();

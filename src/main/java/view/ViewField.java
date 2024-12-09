@@ -14,5 +14,15 @@ public class ViewField {
     private boolean isChangeable;
 
     private boolean isDisplayable;
+    private ViewField valueFrom = null;
+    private boolean isList = false;
+    private String dataSource;
 
+
+    public ViewField(String attributeName, String attributeValue, boolean isChangeable, boolean isDisplayable) {
+        this.attributeName = attributeName;
+        this.attributeValue = attributeValue;
+        this.isChangeable = isChangeable;
+        this.isDisplayable = isDisplayable;
+    }
 }

@@ -37,6 +37,11 @@ public class ResidentRepositoryInMemory implements IResidentRepository {
     }
 
     @Override
+    public List<Resident> getAllResidents() {
+        return new LinkedList<>(residents);
+    }
+
+    @Override
     public String getNameByUserId(int userId) {
         Resident resident = residents.stream().filter(r -> r.getUserId() == userId).findFirst().get();
         return resident.getName() + " " + resident.getSurname();

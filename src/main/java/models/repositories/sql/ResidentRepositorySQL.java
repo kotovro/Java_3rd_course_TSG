@@ -4,6 +4,8 @@ import models.entities.Resident;
 import models.repositories.interfaces.IResidentRepository;
 
 import java.sql.*;
+import java.util.LinkedList;
+import java.util.List;
 
 public class ResidentRepositorySQL extends PostgreDBRepository implements IDataBaseConnection, IResidentRepository {
 
@@ -48,7 +50,18 @@ public class ResidentRepositorySQL extends PostgreDBRepository implements IDataB
         PreparedStatement statement = null;
         try {
             statement = connection.prepareStatement("select * from \"resident\" where resident_id = ? and active = true");
+            statement.setInt(1, residentId);
             ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                int resId = resultSet.getInt("resident_id");
+                int userId = resultSet.getInt("user_id");
+                String name = resultSet.getString("name");
+                String surname = resultSet.getString("surname");
+                String streetName = resultSet.getString("street_name");
+                String homeNumber = resultSet.getString("home_number");
+                boolean active = resultSet.getBoolean("active");
+                resident = new Resident(resId, userId, name, surname, active, homeNumber, streetName);
+            }
         } catch (Exception e) {
             throw new RuntimeException(e);
         } finally {
@@ -102,6 +115,36 @@ public class ResidentRepositorySQL extends PostgreDBRepository implements IDataB
             return;
         }
         resident.setActive(false);
+    }
+
+    @Override
+    public List<Resident> getAllResidents() {
+        Connection connection = getConnection(url, username, password);
+        if (connection == null) {
+            return null;
+        }
+        List<Resident> residents = new LinkedList<>();
+        PreparedStatement statement = null;
+        try {
+            statement = connection.prepareStatement("select * from \"resident\" where active = true");
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                int resId = resultSet.getInt("resident_id");
+                int userId = resultSet.getInt("user_id");
+                String name = resultSet.getString("name");
+                String surname = resultSet.getString("surname");
+                String streetName = resultSet.getString("street_name");
+                String homeNumber = resultSet.getString("home_number");
+                boolean active = resultSet.getBoolean("active");
+                Resident resident = new Resident(resId, userId, name, surname, active, homeNumber, streetName);
+                residents.add(resident);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            closeConnection(connection, statement);
+        }
+        return residents;
     }
 
     @Override
