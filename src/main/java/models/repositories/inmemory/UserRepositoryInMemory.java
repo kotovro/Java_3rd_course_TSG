@@ -2,6 +2,7 @@ package models.repositories.inmemory;
 
 
 import models.entities.Request;
+import models.entities.Role;
 import models.entities.User;
 import models.repositories.interfaces.IUserRepository;
 
@@ -98,6 +99,11 @@ public class UserRepositoryInMemory implements IUserRepository {
     @Override
     public List<User> getUserList() {
         return users;
+    }
+
+    @Override
+    public List<Role> getRoleList(int userId) {
+        return List.of();
     }
 
     @Override
