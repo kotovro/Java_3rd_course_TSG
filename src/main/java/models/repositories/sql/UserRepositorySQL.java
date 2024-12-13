@@ -1,5 +1,6 @@
 package models.repositories.sql;
 
+import models.entities.Role;
 import models.entities.User;
 import models.repositories.interfaces.IUserRepository;
 
@@ -11,10 +12,9 @@ import java.sql.*;
 import java.util.Base64;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.locks.ReadWriteLock;
 
 public class UserRepositorySQL extends PostgreDBRepository implements IDataBaseConnection, IUserRepository {
-
-    private ResultSet resultSet;
 
     public UserRepositorySQL(String url, String user, String password) {
         super(url, user, password);
@@ -69,7 +69,7 @@ public class UserRepositorySQL extends PostgreDBRepository implements IDataBaseC
         if (connection == null) {return null;}
         PreparedStatement statement = null;
         try {
-            statement = connection.prepareStatement("select * from \"user\"  where \"user\".user_id=?");
+            statement = connection.prepareStatement("select * from \"user\" where \"user\".user_id=?");
             statement.setInt(1,UserId);
             ResultSet resultSet = statement.executeQuery();
             if (resultSet == null) {
@@ -258,10 +258,36 @@ public class UserRepositorySQL extends PostgreDBRepository implements IDataBaseC
                 userList.add(user);
             }
         } catch (Exception e) {
-            throw new RuntimeException(e);
+
         } finally {
             closeConnection(connection, statement);
         }
         return userList;
     }
+
+    @Override
+    public List<Role> getRoleList(int userId) {
+        Connection connection = getConnection(url, username, password);
+        List<Role> roleList = new LinkedList<>();
+        if (connection == null) return null;
+        PreparedStatement statement = null;
+        try {
+            statement = connection.prepareStatement(
+                    "select role.role_name, role.role_id from user_role join role on user_role.role_id = role.role_id  where user_id =?");
+            statement.setInt(1, userId);
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                Role role = new Role();
+                role.setName(resultSet.getString("role_name"));
+                role.setId(resultSet.getInt("role_id"));
+                roleList.add(role);
+            }
+        } catch (Exception e) {
+
+        } finally {
+            closeConnection(connection, statement);
+        }
+        return roleList;
+    }
+
 }

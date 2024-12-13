@@ -1,6 +1,7 @@
 package models.repositories.interfaces;
 
 
+import models.entities.Role;
 import models.entities.User;
 
 import java.util.List;
@@ -15,4 +16,5 @@ public interface IUserRepository {
     String getUserToken(int userId);
     void hashUserPassword(User user);
     List<User> getUserList();
+    List<Role> getRoleList(int userId);
 }

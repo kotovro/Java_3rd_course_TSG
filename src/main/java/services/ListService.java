@@ -1,9 +1,6 @@
 package services;
 
-import models.entities.ListItem;
-import models.entities.RequestState;
-import models.entities.RequestType;
-import models.entities.Resident;
+import models.entities.*;
 import models.repositories.RepositoryProvider;
 import models.repositories.interfaces.IResidentRepository;
 
@@ -30,5 +27,13 @@ public class ListService {
         IResidentRepository residentRepository = RepositoryProvider.getInstance().getResidentRepository();
         List<Resident> list = residentRepository.getAllResidents();
         return list.stream().map(r -> {return new ListItem(Integer.toString(r.getResidentId()), r.getName() + " " + r.getSurname());}).toList();
+    }
+
+    public static List<ListItem> getPermissionLevelsList() {
+        List<ListItem> permissionsList = new ArrayList<ListItem>();
+        for (PermissionLevel permissionLevel : PermissionLevel.values()) {
+            permissionsList.add(new ListItem(permissionLevel.name(), permissionLevel.name()));
+        }
+        return permissionsList;
     }
 }

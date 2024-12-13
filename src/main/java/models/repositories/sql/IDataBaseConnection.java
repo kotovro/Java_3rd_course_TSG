@@ -1,9 +1,6 @@
 package models.repositories.sql;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
 
 public interface IDataBaseConnection {
     default Connection getConnection(String url, String user, String password) {
@@ -29,5 +26,17 @@ public interface IDataBaseConnection {
         }
     }
 
+    default void closeConnection(Connection connection, CallableStatement statement) {
+        try {
+            if (statement != null) {
+                statement.close();
+            }
+        } catch (Exception e) {
+        }
+        try {
+            connection.close();
+        } catch (Exception e) {
+        }
+    }
 
 }

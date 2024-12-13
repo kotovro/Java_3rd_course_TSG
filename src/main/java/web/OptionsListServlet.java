@@ -34,6 +34,8 @@ public class OptionsListServlet extends HttpServlet {
             case "/resident":
                 list = getResidentList(token);
                 break;
+            case "/permission":
+                list = getPermissionList(token);
         }
         resp.setContentType("application/json");
         resp.getWriter().print(list);
@@ -68,7 +70,19 @@ public class OptionsListServlet extends HttpServlet {
         catch (Exception e) {
             return "";
         }
+    }
+
+    private String getPermissionList(String token) {
+        ListItem[] list = ListService.getPermissionLevelsList().toArray(new ListItem[0]);
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            return mapper.writeValueAsString(new JSONResult(list));
         }
+        catch (Exception e) {
+            return "";
+        }
+    }
+
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         super.doPost(req, resp);

@@ -4,5 +4,6 @@ public enum RouteType {
     RESIDENT,
     ROLE,
     STATUS,
-    TYPE
+    TYPE,
+    PERMISSION
 }

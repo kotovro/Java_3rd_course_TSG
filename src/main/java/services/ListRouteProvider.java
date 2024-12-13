@@ -1,8 +1,4 @@
 package services;
-
-import services.actionProviders.ActionProviderContainer;
-import services.actionProviders.IActionProvider;
-
 public class ListRouteProvider {
 
     public static String getRoute(RouteType routeType) {
@@ -18,6 +14,9 @@ public class ListRouteProvider {
             }
             case STATUS -> {
                 return "list/status";
+            }
+            case PERMISSION ->{
+                return "list/permission";
             }
         }
         return "";

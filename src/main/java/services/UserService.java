@@ -1,11 +1,8 @@
 package services;
 
-import models.entities.Request;
-import models.entities.RequestState;
-import models.entities.RequestType;
+import models.entities.*;
 import models.repositories.RepositoryProvider;
 import lombok.Setter;
-import models.entities.User;
 import models.repositories.interfaces.IRequestRepository;
 import models.repositories.interfaces.IResidentRepository;
 import models.repositories.interfaces.IStaffMemberRepository;
@@ -23,6 +20,7 @@ import javax.swing.text.View;
 import java.security.SecureRandom;
 import java.security.spec.KeySpec;
 import java.util.Base64;
+import java.util.LinkedList;
 import java.util.List;
 
 public class UserService {
@@ -36,10 +34,10 @@ public class UserService {
         ViewModel vm = new ViewModel();
 
 
+        IUserRepository userRep = repositoryProvider.getUserRepository();
         User user = null;
         if (userId > 0) {
             vm.setTitle("User " + Integer.toString(userId));
-            IUserRepository userRep = repositoryProvider.getUserRepository();
             user = userRep.getUserById(userId);
         }
         else {
@@ -54,14 +52,16 @@ public class UserService {
         parameters.add(new ViewField("User Id", userIdStr, false, false));
         parameters.add(new ViewField("Login", user.getLogin(), true, false));
         parameters.add(new ViewField("Password", user.getPassword(), true, false));
-
+        List<Role> roles = userRep.getRoleList(userId);
+        int len = roles.size();
+        for (Role role : roles) {
+            parameters.add(new ViewField("Role" + len, role.getName(), false, true));
+        }
         IActionProvider userActionProvider = ActionProviderContainer.getUserActionProvider();
         Action show = userActionProvider.getActionShow(userIdStr, "", null, null, false);
         Action back = userActionProvider.getActionBack("", "Back to users list");
         Action update = userActionProvider.getActionUpdate(userIdStr, "Update user", show, show);
-//        Action addRole = ActionProviderContainer.getRoleActionProvider().getActionAdd("-1", "Add role", update, null);
         vm.addCommand(update);
-//        vm.addCommand(addRole);
 
         if (userId > 0) {
             Action add = userActionProvider.getActionAdd("", "Add", update, update);
@@ -89,6 +89,7 @@ public class UserService {
         for (User user : usrList)
         {
             Action action = userActionProvider.getActionShow( Integer.toString(user.getUserId()), "User " + user.getLogin() + "\n", null, null, true);
+            action.setListItem(true);
             viewModel.getActionsList().add(action);
         }
         Action updateNew = userActionProvider.getActionUpdate("-1", "", null, null);

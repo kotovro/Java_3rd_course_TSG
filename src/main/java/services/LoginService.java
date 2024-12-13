@@ -10,11 +10,6 @@ import view.Action;
 import view.ViewField;
 import view.ViewModel;
 
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
-import java.security.SecureRandom;
-import java.security.spec.KeySpec;
-import java.util.Base64;
 import java.util.List;
 
 public class LoginService {

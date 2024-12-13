@@ -34,12 +34,12 @@ public class RequestServlet extends HttpServlet {
             }
             case "/show":
             case "/add":
+            case "/update":
             {
 
                 out.println(getRequestHTML(param, token));
                 break;
             }
-
             default:
                 out.println(pathInfo + " default");
                 break;
@@ -78,6 +78,29 @@ public class RequestServlet extends HttpServlet {
                             .append("/>");
                 }
                 stringBuilder.append("</div>");
+            }
+        }
+        stringBuilder.append("</div><div class='row g-3'>");
+        for (Action action: viewModel.getActionsList())
+        {
+            if (action.isListItem()) {
+                String[] permissionData = action.getActionName().split(" -> ");
+                stringBuilder.append("<div class=col-md-3>")
+                        .append("<label class='form-label' for='")
+                        .append(permissionData[0]).append("'>")
+                        .append(permissionData[0])
+                        .append("</label>");
+                stringBuilder
+                        .append("<select class='form-control' id='").append(action.getActionName()).append("'")
+                        .append(" data-ajax--cache='true' data-ajax--url='").append(action.getDataSource())
+                        .append("?token=").append(token).append("&param=").append(action.getParameter()).append("'>")
+                        .append("<option selected='selected' value='").append(permissionData[1]).append("'>").append(permissionData[1]).append("</option>")
+                        .append("</select>")
+                        .append("</div>");
+            } else if (action.getActionName() != null ){
+                stringBuilder.append("<button type='button' class='btn btn-primary btn-sm' onclick='getContent(\"").append(
+                                action.getRoute()).append("?token=").append(token).append("&param=").append(action.getParameter()).append("\");'>")
+                        .append(action.getActionName()).append("</button>");
             }
         }
         stringBuilder.append("</div>");

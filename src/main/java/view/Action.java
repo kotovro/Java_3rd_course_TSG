@@ -28,6 +28,7 @@ public class Action {
     private String actionName;
     private Action onSuccess = null;
     private Action onError = null;
+    private String dataSource = null;
     private boolean isInteractive = true;
     private Permissions permissionId = null;
     private PermissionLevel permissionLevel = null;

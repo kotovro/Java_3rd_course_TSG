@@ -49,8 +49,11 @@ public class RoleRepositoryInMemory implements IRoleRepository {
                 .setLevel(permission.getLevel());
     }
 
+
     @Override
     public List<Role> getRoleList() {
         return roles;
     }
+
+
 }

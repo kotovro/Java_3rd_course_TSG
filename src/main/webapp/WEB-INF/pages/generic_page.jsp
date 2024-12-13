@@ -24,6 +24,10 @@
             .select2-container--default .select2-selection--single .select2-selection__rendered {
                 line-height: 36px;
             }
+            .btn-primary {
+                margin: 10px 10px 10px 0;
+            }
+
     </style>
 </head>
 <body>
@@ -43,13 +47,20 @@
             </div>
         </div>
     </nav>
-    <div id="content"></div>
+
+    <form id='formContent' method="post" >
+        <div class="alert alert-danger text-center" id="errorMessage" style="display:none;"></div>
+
+        <div id="content"></div>
+    </form>
     <script type="text/javascript">
         const getContent = function(route) {
+            $("#errorMessage").empty().css('display', 'none');
             const contentDiv = $("#content");
             contentDiv.empty();
             $.ajax({
                 async: false,
+                cache: false,
                 success: (data) => {
                     if (data) {
                         contentDiv.append(data);
@@ -58,6 +69,34 @@
                 },
                 url: route
             });
+        }
+        const updateContent = function(route) {
+            let postData = {};
+            $("#errorMessage").empty().css('display', 'none');
+            $("#content input, #content select").each(function (idx, el) {
+                postData[$(el).prop("id")] = $(el).val();
+                //console.log($(el).prop("id") + " : "+ $(el).val());
+            });
+
+
+            $.ajax({
+                async: false,
+                data: postData,
+                // type: "POST",
+                // processData: false,
+                // contentType: false,
+                cache: false,
+                error: (data) => {
+                    if (data && data !== "success") {
+                        $("#errorMessage")
+                            .append(data)
+                            .css('display', '');
+                    }
+
+                },
+                url: route
+            });
+
         }
     </script>
 </div>

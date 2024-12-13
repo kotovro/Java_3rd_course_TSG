@@ -10,7 +10,10 @@ import view.Action;
 import view.ViewField;
 import view.ViewModel;
 
+import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 
 public class RoleService {
 
@@ -37,17 +40,23 @@ public class RoleService {
 
         List<ViewField> parameters = vm.getParameters();
         parameters.add(new ViewField("Role Id", roleIdStr, false, false));
-        parameters.add(new ViewField("Permissions\n", "", false, true));
-        parameters.add(new ViewField("Role name", role.getName(), true, false));
+        parameters.add(new ViewField("Permissions\n", "", false, false));
+        parameters.add(new ViewField("Role name", role.getName(), true, true));
 
         List<Permission> rolePermissions = role.getPermissions();
         IActionProvider permissionProvider = ActionProviderContainer.getPermissionActionProvider();
-        for (Permission rolePermission : rolePermissions) {
+        for (Permissions perm : Permissions.values()) {
+            Permission rolePermission = new Permission(perm, PermissionLevel.NOT_ACCESSIBLE);
+            rolePermissions.stream().filter(p -> p.getId().equals(perm)).findFirst().ifPresent(p -> {rolePermission.setLevel(p.getLevel());});
             String param = roleIdStr + "/" + rolePermission.getId().getId();
             Action updatePermission = permissionProvider.getActionUpdate(param, "", null, null);
-            vm.addCommand(permissionProvider.getActionAdd(param,
-                    rolePermission.getId().name() + " " + rolePermission.getLevel().name(),
-                    updatePermission, null));
+            Action addPermission = permissionProvider.getActionAdd(param,
+                    rolePermission.getId().name() + " -> " + rolePermission.getLevel().name(),
+                    updatePermission, null);
+            addPermission.setListItem(true);
+            addPermission.setInteractive(true);
+            addPermission.setDataSource(ListRouteProvider.getRoute(RouteType.PERMISSION));
+            vm.addCommand(addPermission);
         }
         IActionProvider roleActionProvider = ActionProviderContainer.getRoleActionProvider();
         Action show = roleActionProvider.getActionShow(roleIdStr, "", null, null, false);
@@ -82,6 +91,7 @@ public class RoleService {
         for (Role role : reqList)
         {
             Action action = roleActionProvider.getActionShow( Integer.toString(role.getId()), "Role " + role.getName() + "\n", null, null, true);
+            action.setListItem(true);
             viewModel.getActionsList().add(action);
         }
         Action updateNew = roleActionProvider.getActionUpdate("-1", "", null, null);
@@ -117,7 +127,7 @@ public class RoleService {
         Permission permission = getPermissionFromRole(param);
         ViewModel vm = new ViewModel();
         List<ViewField> vmParams = vm.getParameters();
-        vmParams.add(new ViewField(permission.getId().name() + "permission level", "", false, true));
+        vmParams.add(new ViewField(permission.getId().name() + "permission level", permission.getLevel().name(), true, false));
         vmParams.add(new ViewField("role/permission", param, false, false));
         return vm;
     }
@@ -141,8 +151,11 @@ public class RoleService {
         int permissionId = Integer.parseInt(params[1]);
 
         IRoleRepository rep = repositoryProvider.getRoleRepository();
-        List<Permission> permissions = rep.getRoleById(roleId).getPermissions();
-        return permissions.stream().filter(r -> r.getId().getId() == permissionId).findFirst().get();
+        List<Permission> savedPermissions = rep.getRoleById(roleId).getPermissions();
+
+        Optional<Permission> savedPermission = savedPermissions.stream().filter(r -> r.getId().getId() == permissionId).findFirst();
+
+        return savedPermission.orElse(new Permission(Permissions.name(permissionId), PermissionLevel.NOT_ACCESSIBLE));
     }
 
     public ViewModel getPermissionsList(String roleId) {

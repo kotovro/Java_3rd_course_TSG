@@ -1,6 +1,5 @@
 package controller;
 
-import models.repositories.RepositoryProvider;
 import services.RoleService;
 import view.ViewModel;
 

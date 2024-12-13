@@ -6,6 +6,7 @@ import models.entities.Permissions;
 import models.entities.Role;
 import models.repositories.interfaces.IRoleRepository;
 
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -147,17 +148,31 @@ public class RoleRepositorySQL extends PostgreDBRepository implements IRoleRepos
         if (connection == null) {
             return;
         }
-        PreparedStatement statement = null;
+        //PreparedStatement statement = null;
+        PreparedStatement call = null;
         try {
-            statement = connection.prepareStatement("update \"permission_role\" set permission_level_id = ? where role_id = ? and permission_name_id = ?");
-            statement.setInt(1, permission.getLevel().getPriority());
-            statement.setInt(2, roleId);
-            statement.setInt(3, permission.getId().getId());
-            statement.executeUpdate();
+            call = connection.prepareStatement("CALL update_user_permissions(?, ?, ?)");
+//            StringBuilder query = new StringBuilder("do ");
+//            query.append("$do$ ")
+//                    .append("begin ")
+//                    .append("update \"role_permission\" set permission_level_id = ? where role_id = ? and permission_name_id = ?; ")
+//                    .append("if not found then ")
+//                    .append("insert into \"role_permission\" (permission_name_id, permission_level_id, role_id) values (?, ?, ?); ")
+//                    .append("end if; ")
+//                    .append("end ");
+//                    //.append("$do$");
+//            call = connection.prepareCall(query.toString());
+//            call.setInt(1, permission.getLevel().getPriority());
+//            call.setInt(2, roleId);
+//            call.setInt(3, permission.getId().getId());
+            call.setInt(1, roleId);
+            call.setInt(2, permission.getId().getId());
+            call.setInt(3, permission.getLevel().getPriority());
+            call.execute();
         } catch (Exception e) {
             throw new RuntimeException(e);
         } finally {
-            closeConnection(connection, statement);
+            closeConnection(connection, call);
         }
     }
 
