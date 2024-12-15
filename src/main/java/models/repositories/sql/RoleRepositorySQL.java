@@ -176,4 +176,20 @@ public class RoleRepositorySQL extends PostgreDBRepository implements IRoleRepos
         }
     }
 
+    @Override
+    public void deleteRole(int id) {
+        Connection connection = getConnection(url, username, password);
+        PreparedStatement call = null;
+        try {
+            call = connection.prepareStatement("CALL delete_role(?)");
+            call.setInt(1, id);
+            call.execute();
+        } catch (Exception e) {
+
+        }
+        finally {
+            closeConnection(connection, call);
+        }
+    }
+
 }

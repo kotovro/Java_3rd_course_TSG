@@ -61,17 +61,15 @@ public class RoleService {
         IActionProvider roleActionProvider = ActionProviderContainer.getRoleActionProvider();
         Action show = roleActionProvider.getActionShow(roleIdStr, "", null, null, false);
         Action back = roleActionProvider.getActionBack("", "Back to roles list");
-        Action update = roleActionProvider.getActionUpdate(roleIdStr, "Update role", show, show);
+        Action update = roleActionProvider.getActionUpdate(roleIdStr, roleId > 0 ? "Update role" : "Add role", show, show);
         vm.addCommand(update);
 
         if (roleId > 0) {
-
-            Action add = roleActionProvider.getActionAdd("", "Add", update, update);
+            Action add = roleActionProvider.getActionAdd("-1", "Add role", update, update);
             vm.addCommand(add);
 
-            Action delete = roleActionProvider.getActionDelete(roleIdStr, "Delete", back, back);
+            Action delete = roleActionProvider.getActionDelete(roleIdStr, "Delete role", back, back);
             vm.addCommand(delete);
-
         }
 
         vm.addCommand(back);
@@ -184,5 +182,12 @@ public class RoleService {
         exit.setActionType(Action.ActionType.EXIT);
         viewModel.addCommand(exit);
         return viewModel;
+    }
+
+    public ViewModel deleteRole(String idStr) {
+        int id = Integer.parseInt(idStr);
+        IRoleRepository rep = repositoryProvider.getRoleRepository();
+        rep.deleteRole(id);
+        return new ViewModel();
     }
 }

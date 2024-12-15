@@ -13,13 +13,10 @@ import java.util.List;
 @AllArgsConstructor
 public class Role {
     private int id = -1;
-    private String name = "";
+    private String name = "New role";
     private List<Permission> permissions = new LinkedList<>();
 
     public Role() {}
-//    public Role(List<Permissions> permissions) {
-//        this.permissions = permissions;
-//    }
 
     public void updateFromObject(Role role) {
         role.setName(this.name);

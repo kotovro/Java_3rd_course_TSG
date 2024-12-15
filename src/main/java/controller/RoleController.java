@@ -28,9 +28,11 @@ public class RoleController extends AbstractController {
         vm.setUserToken(userToken);
         return permissionService.applyPermissions(vm);
     }
-    public ViewModel delete(ViewModel viewModel) {
-//        mock
-        return viewModel;
+
+    public ViewModel delete(String str) {
+        ViewModel vm = roleService.deleteRole(str);
+        vm.setUserToken(userToken);
+        return permissionService.applyPermissions(vm);
     }
 
     public ViewModel getList(String param) {

@@ -53,9 +53,8 @@ public class UserService {
         parameters.add(new ViewField("Login", user.getLogin(), true, false));
         parameters.add(new ViewField("Password", user.getPassword(), true, false));
         List<Role> roles = userRep.getRoleList(userId);
-        int len = roles.size();
         for (Role role : roles) {
-            parameters.add(new ViewField("Role" + len, role.getName(), false, true));
+            parameters.add(new ViewField("Role", role.getName(), false, true));
         }
         IActionProvider userActionProvider = ActionProviderContainer.getUserActionProvider();
         Action show = userActionProvider.getActionShow(userIdStr, "", null, null, false);

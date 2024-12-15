@@ -49,6 +49,11 @@ public class RoleRepositoryInMemory implements IRoleRepository {
                 .setLevel(permission.getLevel());
     }
 
+    @Override
+    public void deleteRole(int id) {
+        //
+    }
+
 
     @Override
     public List<Role> getRoleList() {

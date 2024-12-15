@@ -80,6 +80,7 @@ public class RequestServlet extends HttpServlet {
                 stringBuilder.append("</div>");
             }
         }
+        StringBuilder buttonBuilder = new StringBuilder("<div class='d-grid gap-2 d-md-block'>");
         stringBuilder.append("</div><div class='row g-3'>");
         for (Action action: viewModel.getActionsList())
         {
@@ -98,13 +99,14 @@ public class RequestServlet extends HttpServlet {
                         .append("</select>")
                         .append("</div>");
             } else if (action.getActionName() != null ){
-                stringBuilder.append("<button type='button' class='btn btn-primary btn-sm' onclick='getContent(\"").append(
+                buttonBuilder.append("<button type='button' class='btn btn-primary btn-sm' onclick='getContent(\"").append(
                                 action.getRoute()).append("?token=").append(token).append("&param=").append(action.getParameter()).append("\");'>")
                         .append(action.getActionName()).append("</button>");
             }
         }
         stringBuilder.append("</div>");
-        return stringBuilder.toString();
+        buttonBuilder.append("</div>");
+        return stringBuilder.toString() + "<div> </div>" + buttonBuilder.toString();
     }
 
     @Override

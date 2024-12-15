@@ -11,4 +11,5 @@ public interface IRoleRepository {
     List<Role> getRoleList();
     int updateRole(Role role);
     void updateRolePermission(int roleId, Permission permission);
+    void deleteRole(int id);
 }

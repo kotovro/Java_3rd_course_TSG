@@ -27,7 +27,6 @@
             .btn-primary {
                 margin: 10px 10px 10px 0;
             }
-
     </style>
 </head>
 <body>
@@ -58,7 +57,9 @@
             $("#errorMessage").empty().css('display', 'none');
             const contentDiv = $("#content");
             contentDiv.empty();
+
             $.ajax({
+                url: route,
                 async: false,
                 cache: false,
                 success: (data) => {
@@ -67,7 +68,6 @@
                         $("select").select2();
                     }
                 },
-                url: route
             });
         }
         const updateContent = function(route) {
@@ -80,6 +80,7 @@
 
 
             $.ajax({
+                url: route,
                 async: false,
                 data: postData,
                 // type: "POST",
@@ -92,9 +93,7 @@
                             .append(data)
                             .css('display', '');
                     }
-
                 },
-                url: route
             });
 
         }
