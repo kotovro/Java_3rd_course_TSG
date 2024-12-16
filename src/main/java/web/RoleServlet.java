@@ -1,20 +1,28 @@
 package web;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import controller.ControllerService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import models.entities.ListItem;
 import services.actionProviders.ActionProviderContainer;
 import services.actionProviders.IActionProvider;
 import view.Action;
 import view.ViewField;
 import view.ViewModel;
+import web.page.elements.*;
 
+import java.awt.*;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+
+import static web.page.elements.ButtonType.GET;
 
 @WebServlet("/Role/*")
 public class RoleServlet extends HttpServlet {
@@ -26,26 +34,29 @@ public class RoleServlet extends HttpServlet {
         PrintWriter out = resp.getWriter();
 
 
+
         switch (pathInfo) {
             case "/getList": {
+                resp.setContentType("application/json");
                 out.println(getRoleListHTML(token));
                 break;
             }
             case "/show":
             case "/add": {
-
+                resp.setContentType("application/json");
                 out.println(getRoleHTML(param, token));
                 break;
             }
             case "/update": {
                 String error = getRoleUpdateResult(req);
-                if(!error.isEmpty()) {
+                if (!error.isEmpty()) {
                     out.println(error);
                     resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 }
                 break;
             }
             case "/delete": {
+                resp.setContentType("application/json");
                 deleteRole(param, token);
                 out.println(getRoleListHTML(token));
                 break;
@@ -71,112 +82,81 @@ public class RoleServlet extends HttpServlet {
         ControllerService controllerService = new ControllerService();
         ViewModel viewModel = controllerService.doAction(showRole, null, token);
 
-        String topBuffer = "<div style='padding-top: 10px;padding-bottom: 30px'></div>";
-        String viewFieldsHTML = getPartHTMLViewFields(token, viewModel);
-        viewFieldsHTML += getPartHTMLSelect(token, viewModel);
-        String buttonsHTML = getPartHTMLButtons(token, viewModel);
+        PageContent pageContent = new PageContent();
+        pageContent.getInputs().addAll(getPartHTMLViewFields(token, viewModel));
+        pageContent.getSelects().addAll(getPartHTMLSelect(token, viewModel));
+        pageContent.getButtons().addAll(getPartHTMLButtons(token, viewModel));
 
-        return topBuffer + viewFieldsHTML + buttonsHTML;
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            return mapper.writeValueAsString(pageContent);
+        } catch (Exception e) {
+            return "";
+        }
     }
 
-    private static String getPartHTMLSelect(String token, ViewModel viewModel) {
-        StringBuilder stringBuilder = new StringBuilder("<div class='row g-3'>");
+    private static List<WebSelect> getPartHTMLSelect(String token, ViewModel viewModel) {
+        List<WebSelect> selectList = new LinkedList<>();
+        for (ViewField viewField : viewModel.getParameters()) {
+            if (viewField.isDisplayable() && viewField.isList()) {
+
+                String fieldId = WebUtils.sanitizeOutput(
+                        viewField.getValueFrom().getAttributeName().replace(' ', '_'));
+                selectList.add(new WebSelect(fieldId,
+                        WebUtils.sanitizeOutput(viewField.getAttributeName()),
+                        WebUtils.sanitizeOutput(viewField.getValueFrom().getAttributeValue()),
+                        WebUtils.sanitizeOutput(viewField.getAttributeValue()),
+                        WebUtils.sanitizeOutput(viewField.getDataSource()) + "?token=" + token));
+            }
+        }
         for (Action action : viewModel.getActionsList()) {
             if (action.isListItem()) {
                 String[] permissionData = Arrays.stream(
                                 action.getActionName().split(" -> "))
                         .map(WebUtils::sanitizeOutput)
                         .toArray(String[]::new);
-                stringBuilder.append("<div class=col-md-3>")
-                        .append("<label class='form-label' for='")
-                        .append(permissionData[0]).append("'>")
-                        .append(permissionData[0])
-                        .append("</label>");
-                stringBuilder
-                        .append("<select class='form-control' id='").append(permissionData[0]).append("'")
-                        .append(" data-ajax--cache='true' data-ajax--url='").append(WebUtils.sanitizeOutput(action.getDataSource()))
-                        .append("?token=").append(token).append("&param=").append(WebUtils.sanitizeOutput(action.getParameter())).append("'>")
-                        .append("<option selected='selected' value='").append(permissionData[1]).append("'>").append(permissionData[1]).append("</option>")
-                        .append("</select>")
-                        .append("</div>");
+                selectList.add(new WebSelect(
+                        permissionData[0],
+                        permissionData[0],
+                        permissionData[1],
+                        permissionData[1],
+                        WebUtils.sanitizeOutput(action.getDataSource()) +
+                                "?token=" + token + "&param=" + WebUtils.sanitizeOutput(action.getParameter())
+                ));
             }
         }
-        stringBuilder.append("</div>");
-        return stringBuilder.toString();
+        return selectList;
     }
 
-    private static String getPartHTMLButtons(String token, ViewModel viewModel) {
-        StringBuilder buttonBuilder = new StringBuilder("<div class='d-grid gap-2 d-md-block'>");
+    private static List<WebButton> getPartHTMLButtons(String token, ViewModel viewModel) {
+        List<WebButton> webButtons = new LinkedList<>();
         for (Action action : viewModel.getActionsList()) {
             if (!action.isListItem() && action.getActionName() != null) {
-                String onClickAction = action.getActionType() == Action.ActionType.UPDATE ? "updateContent(\"" : "getContent(\"";
-                buttonBuilder/*.append("<div class=col-md-1>")*/
-                        .append("<button type='button' class='btn btn-primary btn-sm' onclick='").append(onClickAction).append(
-                                WebUtils.sanitizeOutput(action.getRoute())).append("?token=").append(token).append("&param=").append(WebUtils.sanitizeOutput(action.getParameter())).append("\");'>")
-                        .append(WebUtils.sanitizeOutput(action.getActionName()))
-                        .append("</button>");
-                //.append("</div>");
+                webButtons.add(new WebButton("",
+                        WebUtils.sanitizeOutput(action.getActionName()),
+                        WebUtils.sanitizeOutput(action.getRoute()) +
+                                "?token=" + token +
+                                "&param=" + WebUtils.sanitizeOutput(action.getParameter()),
+                        action.getActionType() == Action.ActionType.UPDATE ? ButtonType.UPDATE : ButtonType.GET));
             }
         }
-        buttonBuilder.append("</div>");
-        return buttonBuilder.toString();
+        return webButtons;
     }
 
-    private static String getPartHTMLViewFields(String token, ViewModel viewModel) {
-        StringBuilder stringBuilder = new StringBuilder("<div class='row g-3'>");
+    private static List<WebInput> getPartHTMLViewFields(String token, ViewModel viewModel) {
+        List<WebInput> webInputs = new LinkedList<>();
         for (ViewField viewField : viewModel.getParameters()) {
-            if (viewField.isDisplayable()) {
+            if (viewField.isDisplayable() && !viewField.isList()) {
                 String fieldId = WebUtils.sanitizeOutput(
-                        viewField.isList()
-                                ? viewField.getValueFrom().getAttributeName().replace(' ', '_')
-                                : viewField.getAttributeName().replace(' ', '_'));
-                stringBuilder.append("<div class=col-md-4>")
-                        .append("<label class='form-label' for='")
-                        .append(fieldId).append("'>")
-                        .append(WebUtils.sanitizeOutput(viewField.getAttributeName()))
-                        .append("</label>");
-                if (viewField.isList()) {
-                    stringBuilder.append("<select class='form-control' id='").append(fieldId).append("'")
-                            .append(" data-ajax--cache='true' data-ajax--url='").append(WebUtils.sanitizeOutput(viewField.getDataSource())).append("?token=").append(token).append("'>")
-                            .append("<option selected='selected' value='").append(WebUtils.sanitizeOutput(viewField.getValueFrom().getAttributeValue())).append("'>")
-                            .append(WebUtils.sanitizeOutput(viewField.getAttributeValue())).append("</option>")
-                            .append("</select>");
-                } else {
-                    stringBuilder
-                            .append("<input type='text' class='form-control'")
-                            .append(" value='").append(WebUtils.sanitizeOutput(viewField.getAttributeValue())).append("'")
-                            .append(" id='").append(fieldId).append("'")
-                            .append(!viewField.isChangeable() ? " disabled='true'" : "")
-                            .append("/>");
-                }
-                stringBuilder.append("</div>");
+                        viewField.getAttributeName().replace(' ', '_'));
+                webInputs.add(new WebInput(fieldId,
+                        WebUtils.sanitizeOutput(viewField.getAttributeName()),
+                        WebUtils.sanitizeOutput(viewField.getAttributeValue()),
+                        viewField.isChangeable()));
             }
-            stringBuilder.append("</div>");
         }
-        return stringBuilder.toString();
+        return webInputs;
     }
-
-//    @Override
-//    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-//        String pathInfo = req.getPathInfo();
-//        PrintWriter out = resp.getWriter();
-//
-//        switch (pathInfo) {
-//            case "/update":
-//            {
-//                String error = getRoleUpdateResult(req);
-//                if(!error.isEmpty()) {
-//                    out.println(error);
-//                    resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-//                }
-//                break;
-//            }
-//
-//            default:
-//                out.println(pathInfo + " default");
-//                break;
-//        }
-//    }
 
     private String getRoleUpdateResult(HttpServletRequest req) {
         String param = req.getParameter("param");
@@ -247,33 +227,33 @@ public class RoleServlet extends HttpServlet {
         Action getList = roleActionProvider.getActionList(null, null, null, null);
         ControllerService controllerService = new ControllerService();
         ViewModel viewModel = controllerService.doAction(getList, null, token);
-        StringBuilder buttonBuilder = new StringBuilder("<div style='padding-top: 10px;padding-bottom: 10px'>");
-        StringBuilder listBuilder = new StringBuilder("<div class='list-group'>");
+
+        PageContent pageContent = new PageContent();
+        List<WebListItem> listItems = pageContent.getListItems();
+        List<WebButton> listButtons = pageContent.getButtons();
 
         for (Action action : viewModel.getActionsList()) {
             if (action.isListItem()) {
-                listBuilder
-                        .append("<a class='list-group-item list-group-item-action' href='#' onclick='getContent(\"")
-                        .append(WebUtils.sanitizeOutput(action.getRoute()))
-                        .append("?token=").append(token)
-                        .append("&param=").append(WebUtils.sanitizeOutput(action.getParameter()))
-                        .append("\");'>")
-                        .append(WebUtils.sanitizeOutput(action.getActionName()))
-                        .append("</a>");
+                listItems.add(new WebListItem("",
+                        WebUtils.sanitizeOutput(action.getRoute()) +
+                                "?token=" + token +
+                                "&param=" + WebUtils.sanitizeOutput(action.getParameter()),
+                        WebUtils.sanitizeOutput(action.getActionName())));
             } else if (action.isInteractive() && action.getActionName() != null) {
-                buttonBuilder.append("<button type='button' class='btn btn-primary btn-sm' onclick='getContent(\"")
-                        .append(WebUtils.sanitizeOutput(action.getRoute()))
-                        .append("?token=").append(token)
-                        .append("&param=").append(WebUtils.sanitizeOutput(action.getParameter()))
-                        .append("\");'>")
-                        .append(WebUtils.sanitizeOutput(action.getActionName()))
-                        .append("</button>");
+                listButtons.add(new WebButton("",
+                        WebUtils.sanitizeOutput(action.getActionName()),
+                        WebUtils.sanitizeOutput(action.getRoute()) +
+                                "?token=" + token +
+                                "&param=" + WebUtils.sanitizeOutput(action.getParameter()),
+                        GET));
             }
         }
-        listBuilder.append("</div>");
-        buttonBuilder.append("</div>");
 
-
-        return buttonBuilder.toString() + listBuilder.toString();
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            return mapper.writeValueAsString(pageContent);
+        } catch (Exception e) {
+            return "";
+        }
     }
 }
