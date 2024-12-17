@@ -13,6 +13,7 @@ import java.sql.ResultSet;
 
 import java.util.LinkedList;
 import java.util.List;
+
 public class RoleRepositorySQL extends PostgreDBRepository implements IRoleRepository, IDataBaseConnection {
 
     public RoleRepositorySQL(String url, String user, String password) {
@@ -70,7 +71,7 @@ public class RoleRepositorySQL extends PostgreDBRepository implements IRoleRepos
             statement = connection.prepareStatement("insert into \"role\"  (role_name) values (?) returning role_id");
             statement.setString(1, role.getName());
             ResultSet resultSet = statement.executeQuery();
-            if(!resultSet.next()) {
+            if (!resultSet.next()) {
                 return;
             }
             role.setId(resultSet.getInt("role_id"));
@@ -186,10 +187,33 @@ public class RoleRepositorySQL extends PostgreDBRepository implements IRoleRepos
             call.execute();
         } catch (Exception e) {
 
-        }
-        finally {
+        } finally {
             closeConnection(connection, call);
         }
+    }
+
+    @Override
+    public int getUserRolesCount(int id) {
+        Connection connection = getConnection(url, username, password);
+        if (connection == null) {
+            return -1;
+        }
+        int res = 0;
+        PreparedStatement preparedStatement = null;
+        try {
+            preparedStatement = connection.prepareStatement("select count(*) from user_role where  role_id=?");
+            preparedStatement.setInt(1, id);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                res = resultSet.getInt(1);
+            }
+        } catch (Exception e) {
+
+        }
+        finally {
+            closeConnection(connection, preparedStatement);
+        }
+        return res;
     }
 
 }

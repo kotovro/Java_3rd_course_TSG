@@ -54,6 +54,11 @@ public class RoleRepositoryInMemory implements IRoleRepository {
         //
     }
 
+    @Override
+    public int getUserRolesCount(int id) {
+        return 0;
+    }
+
 
     @Override
     public List<Role> getRoleList() {

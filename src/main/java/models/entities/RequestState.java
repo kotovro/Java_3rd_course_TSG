@@ -3,7 +3,6 @@ package models.entities;
 import lombok.Getter;
 
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Map;
 
 public enum RequestState {
@@ -12,15 +11,15 @@ public enum RequestState {
     FINISHED(3);
 
     @Getter
-    private final int state;
+    private final int stateId;
     RequestState(int stateId) {
-        this.state = stateId;
+        this.stateId = stateId;
     }
     private static final Map<Integer, RequestState> lookup = new HashMap<>();
 
     static {
         for (RequestState name : RequestState.values()) {
-            lookup.put(name.getState(), name);
+            lookup.put(name.getStateId(), name);
         }
     }
 

@@ -28,6 +28,7 @@ public class UserServlet extends HttpServlet {
         switch (pathInfo) {
             case "/getList":
             {
+                resp.setContentType("application/json");
                 out.println(getUserListHTML(token));
                 break;
             }

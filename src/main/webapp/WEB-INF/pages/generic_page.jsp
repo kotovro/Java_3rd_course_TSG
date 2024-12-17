@@ -80,7 +80,7 @@
                     "<div class=col-md-4>" +
                         "<label class='form-label' for='" + list[i].id + "'>" + list[i].label + "</label>" +
                         "<input type='text' class='form-control' value='" + list[i].value + "' id='" + list[i].id + "'" +
-                            (list[i].isEnabbled == "false" ? " disabled='true'" : "") + "/>" +
+                            (!list[i].isEnabled ? " disabled='true'" : "") + "/>" +
                     "</div>"
                 );
             }
@@ -155,6 +155,9 @@
                 // processData: false,
                 // contentType: false,
                 cache: false,
+                success: () => {
+                    alert("Update successful");
+                },
                 error: (data) => {
                     if (data && data !== "success") {
                         $("#errorMessage")

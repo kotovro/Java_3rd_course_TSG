@@ -26,12 +26,10 @@ public class RequestRepositorySQl extends PostgreDBRepository implements IReques
         PreparedStatement statement = null;
         int addedRequestId = -1;
         try {
-            request.getAuthorId();
-            request.getTime();
             statement = connection.prepareStatement("insert into \"request\" (date, state, author_id, description, type, resident_id) values (?, ?, ?, ?, ?, ?) returning request_id" );
             request.setTime(new java.util.Date(ZonedDateTime.now().toInstant().toEpochMilli()));
             statement.setDate(1, new java.sql.Date(ZonedDateTime.now().toInstant().toEpochMilli()));
-            statement.setInt(2, request.getState().getState());
+            statement.setInt(2, request.getState().getStateId());
             statement.setInt(3, request.getAuthorId());
             statement.setString(4, request.getDescription());
             statement.setInt(5, request.getType().getRequestTypeId());
@@ -42,7 +40,7 @@ public class RequestRepositorySQl extends PostgreDBRepository implements IReques
                 request.setRequestId(addedRequestId);
             }
         } catch (Exception e) {
-
+            throw new RuntimeException(e);
         } finally {
             closeConnection(connection, statement);
         }
@@ -106,7 +104,7 @@ public class RequestRepositorySQl extends PostgreDBRepository implements IReques
                 preparedStatement.setDate(1, date);
                 preparedStatement.setString(2, request.getDescription());
                 preparedStatement.setInt(3, request.getType().getRequestTypeId());
-                preparedStatement.setInt(4, request.getState().getState());
+                preparedStatement.setInt(4, request.getState().getStateId());
                 preparedStatement.setInt(5, request.getResidentId());
                 preparedStatement.setInt(6, request.getAuthorId());
                 preparedStatement.setInt(7, request.getRequestId());
@@ -137,7 +135,7 @@ public class RequestRepositorySQl extends PostgreDBRepository implements IReques
         }
         PreparedStatement preparedStatement = null;
         try {
-            preparedStatement = connection.prepareStatement("select * from \"request\"");
+            preparedStatement = connection.prepareStatement("select * from \"request\" order by request_id desc");
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 Request r = new Request();

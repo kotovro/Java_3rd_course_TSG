@@ -1,5 +1,6 @@
 package web;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import controller.ControllerService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -8,13 +9,15 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import services.actionProviders.ActionProviderContainer;
 import services.actionProviders.IActionProvider;
-import services.actionProviders.RequestActionProvider;
 import view.Action;
 import view.ViewField;
 import view.ViewModel;
+import web.page.elements.*;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.LinkedList;
+import java.util.List;
 
 @WebServlet("/Request/*")
 public class RequestServlet extends HttpServlet {
@@ -29,21 +32,40 @@ public class RequestServlet extends HttpServlet {
         switch (pathInfo) {
             case "/getList":
             {
+                resp.setContentType("application/json");
                 out.println(getRequestListHTML(token));
                 break;
             }
             case "/show":
             case "/add":
-            case "/update":
             {
-
+                resp.setContentType("application/json");
                 out.println(getRequestHTML(param, token));
                 break;
             }
+            case "/update":
+            {
+                out.println(getRequestUpdateResult(req));
+                break;
+            }case "/delete": {
+                resp.setContentType("application/json");
+                deleteRequest(param, token);
+                out.println(getRequestListHTML(token));
+                break;
+            }
+
             default:
                 out.println(pathInfo + " default");
                 break;
         }
+    }
+
+    private void deleteRequest(String param, String token) {
+        Action deleteRequest = ActionProviderContainer
+                .getRequestActionProvider().getActionDelete(param, "", null, null);
+        ControllerService controllerService = new ControllerService();
+        controllerService.doAction(deleteRequest, null, token);
+
     }
 
     private static String getRequestHTML(String param, String token) {
@@ -52,66 +74,66 @@ public class RequestServlet extends HttpServlet {
                 .getActionShow(param, "", null, null, true);
         ControllerService controllerService = new ControllerService();
         ViewModel viewModel = controllerService.doAction(showRequest, null, token);
-        StringBuilder stringBuilder = new StringBuilder("<div style='padding-top: 10px;padding-bottom: 30px'></div><div class='row g-3'>");
-        for (ViewField viewField: viewModel.getParameters()) {
-            if (viewField.isDisplayable()) {
-                String fieldId = viewField.isList()
-                        ? viewField.getValueFrom().getAttributeName().replace(' ', '_')
-                        :  viewField.getAttributeName().replace(' ', '_');
-                stringBuilder.append("<div class=col-md-4>")
-                                .append("<label class='form-label' for='")
-                                    .append(fieldId).append("'>")
-                                    .append(viewField.getAttributeName())
-                                .append("</label>");
-                if (viewField.isList()) {
-                    stringBuilder.append("<select class='form-control' id='").append(fieldId).append("'")
-                                        .append(" data-ajax--cache='true' data-ajax--url='").append(viewField.getDataSource()).append("?token=").append(token).append("'>")
-                                        .append("<option selected='selected' value='").append(viewField.getValueFrom().getAttributeValue()).append("'>")
-                                        .append(viewField.getAttributeValue()).append("</option>")
-                                .append("</select>");
-                } else {
-                    stringBuilder
-                            .append("<input type='text' class='form-control'")
-                            .append(" value='").append(viewField.getAttributeValue()).append("'")
-                            .append(" id='").append(fieldId).append("'")
-                            .append(!viewField.isChangeable() ? " disabled='true'" : "")
-                            .append("/>");
-                }
-                stringBuilder.append("</div>");
-            }
+        PageContent pageContent = new PageContent();
+        pageContent.getButtons().addAll(getButtonsHTML(token, viewModel));
+        pageContent.getSelects().addAll(getSelectsHTML(token, viewModel));
+        pageContent.getInputs().addAll(getInputsHTML(token, viewModel));
+
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            return mapper.writeValueAsString(pageContent);
+        } catch (Exception e) {
+            return "";
         }
-        StringBuilder buttonBuilder = new StringBuilder("<div class='d-grid gap-2 d-md-block'>");
-        stringBuilder.append("</div><div class='row g-3'>");
-        for (Action action: viewModel.getActionsList())
-        {
-            if (action.isListItem()) {
-                String[] permissionData = action.getActionName().split(" -> ");
-                stringBuilder.append("<div class=col-md-3>")
-                        .append("<label class='form-label' for='")
-                        .append(permissionData[0]).append("'>")
-                        .append(permissionData[0])
-                        .append("</label>");
-                stringBuilder
-                        .append("<select class='form-control' id='").append(action.getActionName()).append("'")
-                        .append(" data-ajax--cache='true' data-ajax--url='").append(action.getDataSource())
-                        .append("?token=").append(token).append("&param=").append(action.getParameter()).append("'>")
-                        .append("<option selected='selected' value='").append(permissionData[1]).append("'>").append(permissionData[1]).append("</option>")
-                        .append("</select>")
-                        .append("</div>");
-            } else if (action.getActionName() != null ){
-                buttonBuilder.append("<button type='button' class='btn btn-primary btn-sm' onclick='getContent(\"").append(
-                                action.getRoute()).append("?token=").append(token).append("&param=").append(action.getParameter()).append("\");'>")
-                        .append(action.getActionName()).append("</button>");
-            }
-        }
-        stringBuilder.append("</div>");
-        buttonBuilder.append("</div>");
-        return stringBuilder.toString() + "<div> </div>" + buttonBuilder.toString();
     }
 
-    @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        super.doPost(req, resp);
+    private static List<WebInput> getInputsHTML(String token, ViewModel viewModel) {
+        List<WebInput> inputs = new LinkedList<>();
+        for (ViewField viewField : viewModel.getParameters()) {
+            if (!viewField.isList() && viewField.isDisplayable()) {
+                String fieldId = WebUtils.sanitizeOutput(viewField.getAttributeName().replace(' ', '_'));
+                inputs.add(new WebInput(fieldId,
+                        WebUtils.sanitizeOutput(viewField.getAttributeName()),
+                        WebUtils.sanitizeOutput(viewField.getAttributeValue()),
+                        viewField.isChangeable()));
+            }
+        }
+        return inputs;
+    }
+
+
+    private static List<WebButton> getButtonsHTML(String token, ViewModel viewModel) {
+        List<WebButton> webButtons = new LinkedList<>();
+        for (Action action: viewModel.getActionsList())
+        {
+            if (action.getActionName() != null && !action.isListItem() && action.isInteractive()){
+                webButtons.add(new WebButton("",
+                            WebUtils.sanitizeOutput(action.getActionName()),
+                            action.getRoute()
+                                    + "?token=" + token
+                                    + "&param=" + action.getParameter(),
+                            action.getActionType().equals(Action.ActionType.UPDATE)
+                                ? ButtonType.UPDATE
+                                : ButtonType.GET));
+            }
+        }
+        return webButtons;
+    }
+
+    private static  List<WebSelect> getSelectsHTML(String token, ViewModel viewModel) {
+        List<WebSelect> webSelects = new LinkedList<>();
+
+        for (ViewField viewField: viewModel.getParameters()) {
+            if (viewField.isList() && viewField.isDisplayable()) {
+                webSelects.add(new WebSelect(
+                        WebUtils.sanitizeOutput(viewField.getValueFrom().getAttributeName().replace(' ', '_')),
+                        WebUtils.sanitizeOutput(viewField.getAttributeName()),
+                        WebUtils.sanitizeOutput(viewField.getValueFrom().getAttributeValue()),
+                        WebUtils.sanitizeOutput(viewField.getAttributeValue()),
+                        viewField.getDataSource() + "?token=" + token));
+            }
+        }
+        return webSelects;
     }
 
     private String getRequestListHTML(String token) {
@@ -120,28 +142,73 @@ public class RequestServlet extends HttpServlet {
         Action getList = requestActionProvider.getActionList(null, null, null, null);
         ControllerService controllerService = new ControllerService();
         ViewModel viewModel = controllerService.doAction(getList, null, token);
-        StringBuilder buttonBuilder = new StringBuilder("<div style='padding-top: 10px;padding-bottom: 10px'>");
-        StringBuilder listBuilder = new StringBuilder("<div class='list-group'>");
 
-        for (Action action: viewModel.getActionsList())
-        {
+        PageContent pageContent = new PageContent();
+        List<WebListItem> listItems = pageContent.getListItems();
+        List<WebButton> listButtons = pageContent.getButtons();
+
+        for (Action action: viewModel.getActionsList()) {
             if (action.isListItem()) {
-                listBuilder
-                        .append("<a class='list-group-item list-group-item-action' href='#' onclick='getContent(\"")
-                        .append(action.getRoute()).append("?token=").append(token).append("&param=").append(action.getParameter())
-                        .append("\");'>")
-                        .append(action.getActionName())
-                        .append("</a>");
+                listItems.add(new WebListItem("",
+                        action.getRoute() +
+                                "?token=" + token +
+                                "&param=" + action.getParameter(),
+                        WebUtils.sanitizeOutput(action.getActionName())));
             } else if (action.isInteractive() && action.getActionName() != null) {
-                buttonBuilder.append("<button type='button' class='btn btn-primary btn-sm' onclick='getContent(\"").append(
-                        action.getRoute()).append("?token=").append(token).append("&param=").append(action.getParameter()).append("\");'>")
-                .append(action.getActionName()).append("</button>");
+                listButtons.add(new WebButton("",
+                        WebUtils.sanitizeOutput(action.getActionName()),
+                        action.getRoute() +
+                                "?token=" + token +
+                                "&param=" + action.getParameter(),
+                        action.getActionType().equals(Action.ActionType.UPDATE)
+                                ? ButtonType.UPDATE
+                                : ButtonType.GET
+                ));
             }
         }
-        listBuilder.append("</div>");
-        buttonBuilder.append("</div>");
-
-
-        return buttonBuilder.toString() + listBuilder.toString();
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            return mapper.writeValueAsString(pageContent);
+        } catch (Exception e) {
+            return "";
+        }
     }
+    private String getRequestUpdateResult(HttpServletRequest req) {
+        String param = req.getParameter("param");
+        String token = req.getParameter("token");
+        Action showAction = ActionProviderContainer.getRequestActionProvider().getActionShow(param, null, null, null, false);
+        ControllerService controllerService = new ControllerService();
+        ViewModel vm = controllerService.doAction(showAction, null, token);
+        boolean isRequestChanged = false;
+        String errorMessage = "";
+
+        for (ViewField viewField : vm.getParameters()) {
+            if (viewField.isChangeable()) {
+                String fieldId = WebUtils.sanitizeOutput(
+                        viewField.isList()
+                                ? viewField.getValueFrom().getAttributeName().replace(' ', '_')
+                                : viewField.getAttributeName().replace(' ', '_'));
+                String value = req.getParameter(fieldId);
+
+                if (value != null && !value.equals(WebUtils.sanitizeOutput(viewField.getAttributeValue()))) {
+                    viewField.setAttributeValue(value);
+                    isRequestChanged = true;
+                }
+            }
+        }
+
+        Action update = vm.getActionsList().stream()
+                .filter(a -> a.getActionType() == Action.ActionType.UPDATE)
+                .findFirst()
+                .orElse(null);
+
+        if (isRequestChanged && update != null) {
+            vm = controllerService.doAction(update, vm, token);
+            if (vm.getErrorMessage() != null) {
+                return WebUtils.sanitizeOutput(vm.getErrorMessage());
+            }
+        }
+        return WebUtils.sanitizeOutput(errorMessage);
+    }
+
 }

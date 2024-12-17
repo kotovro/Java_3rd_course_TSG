@@ -5,10 +5,12 @@ import lombok.Setter;
 import models.entities.Request;
 import models.entities.RequestState;
 import models.entities.RequestType;
+import models.entities.User;
 import models.repositories.interfaces.IRequestRepository;
 import models.repositories.interfaces.IResidentRepository;
 import models.repositories.interfaces.IStaffMemberRepository;
 import models.repositories.RepositoryProvider;
+import models.repositories.interfaces.IUserRepository;
 import services.actionProviders.ActionProviderContainer;
 import services.actionProviders.IActionProvider;
 import view.Action;
@@ -53,25 +55,32 @@ public class RequestService  {
         List<ViewField> parameters = requestMdlView.getParameters();
         parameters.add(new ViewField("Request Id", requestIdStr, false, false));
         parameters.add(new ViewField("Description", request.getDescription(), true, true));
-        parameters.add(new ViewField("Author Id", Integer.toString(request.getAuthorId()), true, false));
+        parameters.add(new ViewField("Author Id", Integer.toString(request.getAuthorId()), false, false));
         parameters.add(new ViewField("Author", authorName, false, true));
+
         ViewField resident = new ViewField("Resident Id", Integer.toString(request.getResidentId()), true, false);
         parameters.add(resident);
         parameters.add(new ViewField("Resident", residentName, false, true, resident, true, ListRouteProvider.getRoute(RouteType.RESIDENT)));
-        ViewField type = new ViewField("Type", request.getType().toString(), true, false);
+
+        ViewField type = new ViewField("Type", Integer.toString(request.getType().getRequestTypeId()), true, false);
+        parameters.add(type);
         parameters.add(new ViewField("Request Type", request.getType().toString(), false, true, type, true, ListRouteProvider.getRoute(RouteType.TYPE)));
-        ViewField status = new ViewField("Status", request.getType().toString(), true, false);
+
+        ViewField status = new ViewField("Status", Integer.toString(request.getState().getStateId()), true, false);
+        parameters.add(status);
         parameters.add(new ViewField("Request Status", request.getState().toString(), false, true, status, true, ListRouteProvider.getRoute(RouteType.STATUS)));
+
         parameters.add(new ViewField("Date", request.getTime().toString(), false, true));
 
         IActionProvider requestActionProvider = ActionProviderContainer.getRequestActionProvider();
         Action show = requestActionProvider.getActionShow(requestIdStr, "", null, null, false);
         Action back = requestActionProvider.getActionBack("", "Back to requests list");
-        Action update = requestActionProvider.getActionUpdate(requestIdStr, "Update request", show, show);
+        Action update = requestActionProvider.getActionUpdate(requestIdStr,
+                requestId > 0 ? "Update request" : "Add request", show, show);
         requestMdlView.addCommand(update);
 
         if (requestId > 0) {
-            Action add = requestActionProvider.getActionAdd("", "Add", update, update);
+            Action add = requestActionProvider.getActionAdd("-1", "Add", update, update);
             requestMdlView.addCommand(add);
 
             Action delete = requestActionProvider.getActionDelete(requestIdStr, "Delete", back, back);
@@ -113,7 +122,7 @@ public class RequestService  {
         return viewModel;
     }
 
-    public ViewModel update(ViewModel viewModel) {
+    public ViewModel update(ViewModel viewModel, int userId) {
         int id = Integer.parseInt(
                 viewModel.getParameters()
                         .stream()
@@ -126,14 +135,14 @@ public class RequestService  {
         if (id < 0)
         {
             req = new Request();
+            req.setAuthorId(userId);
         } else {
             req = rep.getRequestById(id);
         }
         req.setDescription(viewModel.getFieldValueByAttributeName("Description"));
-        req.setAuthorId(Integer.parseInt(viewModel.getFieldValueByAttributeName("Author Id")));
         req.setResidentId(Integer.parseInt(viewModel.getFieldValueByAttributeName("Resident Id")));
-        req.setType(RequestType.valueOf(viewModel.getFieldValueByAttributeName("Type")));
-        req.setState(RequestState.valueOf(viewModel.getFieldValueByAttributeName("Status")));
+        req.setType(RequestType.name(Integer.parseInt(viewModel.getFieldValueByAttributeName("Type"))));
+        req.setState(RequestState.name(Integer.parseInt(viewModel.getFieldValueByAttributeName("Status"))));
         id = rep.updateRequest(req);
 
         return fillView(Integer.toString(id));

@@ -66,12 +66,6 @@ public class UserRepositoryInMemory implements IUserRepository {
     }
 
     @Override
-    public User getUserByToken(String token) {
-        int userId = getUserIdFromToken(token);
-        return users.stream().filter(u -> u.getUserId() == userId).findFirst().get();
-    }
-
-    @Override
     public User authenticate(String login, String password) {
         User usr = new User();
         try {

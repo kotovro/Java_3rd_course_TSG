@@ -89,7 +89,7 @@ public class CommentRepositorySQl extends PostgreDBRepository implements ICommen
         requestStates.add(RequestState.STARTED);
         requestStates.add(RequestState.STOPPED);
         requestStates.add(RequestState.FINISHED);
-        return requestStates.stream().filter(s -> s.getState() == stateId).findFirst().get();
+        return requestStates.stream().filter(s -> s.getStateId() == stateId).findFirst().get();
     }
 
     @Override
@@ -105,7 +105,7 @@ public class CommentRepositorySQl extends PostgreDBRepository implements ICommen
                 java.sql.Date dt  = new java.sql.Date(comment.getTime().getTime());
                 statement.setDate(1, dt);
                 statement.setString(2, comment.getBody());
-                statement.setInt(3, comment.getState().getState());
+                statement.setInt(3, comment.getState().getStateId());
                 statement.setInt(4, comment.getAuthorId());
                 statement.setInt(5, comment.getCommentId());
                 ResultSet resSet = statement.executeQuery();

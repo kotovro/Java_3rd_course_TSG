@@ -11,14 +11,14 @@ public class ListService {
     public static List<ListItem> getStatusesList() {
         List<ListItem> statusesList = new ArrayList<ListItem>();
         for (RequestState requestState : RequestState.values()) {
-            statusesList.add(new ListItem(requestState.name(), requestState.name()));
+            statusesList.add(new ListItem(Integer.toString(requestState.getStateId()), requestState.name()));
         }
         return statusesList;
     }
     public static List<ListItem> getTypesList() {
         List<ListItem> typesList = new ArrayList<ListItem>();
         for (RequestType requestType : RequestType.values()) {
-            typesList.add(new ListItem(requestType.name(), requestType.name()));
+            typesList.add(new ListItem(Integer.toString(requestType.getRequestTypeId()), requestType.name()));
         }
         return typesList;
     }

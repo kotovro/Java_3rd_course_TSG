@@ -21,7 +21,8 @@ public class RequestController extends AbstractController {
     }
 
     public ViewModel update(ViewModel viewModel) {
-        ViewModel vm = requestService.update(viewModel);
+        int userId = permissionService.getUserIdFromToken(userToken);
+        ViewModel vm = requestService.update(viewModel, userId);
         vm.setUserToken(userToken);
         return permissionService.applyPermissions(vm);
     }

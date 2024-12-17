@@ -98,38 +98,6 @@ public class UserRepositorySQL extends PostgreDBRepository implements IDataBaseC
         return user;
     }
 
-    @Override
-    public User getUserByToken(String token) {
-        Connection connection = getConnection(url, username, password);
-        if (connection == null) return null;
-        PreparedStatement statement = null;
-        User user = new User();
-        try {
-            statement = connection.prepareStatement("select * from \"user\"  where user_id=?");
-            statement.setInt(1, getUserIdFromToken(token));
-            ResultSet resultSet = statement.executeQuery();
-            if (!resultSet.next()) {
-                return user;
-            }
-            user.setUserId(resultSet.getInt("user_id"));
-            user.setPasswordSalt(resultSet.getBytes("password_salt"));
-            user.setPassword(resultSet.getString("password"));
-            PreparedStatement preparedStatement = connection.prepareStatement("select * from user_role where user_id=?");
-            preparedStatement.setInt(1, getUserIdFromToken(token));
-            ResultSet resultSetForRoles = preparedStatement.executeQuery();
-            List<Integer> userRoles = new LinkedList<>();
-            while (resultSetForRoles.next()) {
-                userRoles.add((resultSetForRoles.getInt("role_id")));
-            }
-            user.setRoles(userRoles);
-        } catch (Exception e) {
-
-        } finally {
-            closeConnection(connection, statement);
-        }
-        return user;
-    }
-
 
     @Override
     public User authenticate(String login, String password) {
@@ -216,9 +184,7 @@ public class UserRepositorySQL extends PostgreDBRepository implements IDataBaseC
             closeConnection(connection, statement);
         }
     }
-    private int getUserIdFromToken(String token) {
-        return Integer.parseInt(token);
-    }
+
     @Override
     public String getUserToken(int userId) {
         return Integer.toString(userId);

@@ -39,6 +39,6 @@ public class RequestActionProvider implements IActionProvider {
 
     @Override
     public Action getActionDelete(String param, String name, Action onSuccess, Action onError) {
-        return new Action(Action.ActionType.DELETE, "Request/delete", param, name, onSuccess, onError, true, Permissions.REQUEST, PermissionLevel.NOT_ACCESSIBLE);
+        return new Action(Action.ActionType.DELETE, "Request/delete", param, name, onSuccess, onError, false, Permissions.REQUEST, PermissionLevel.NOT_ACCESSIBLE);
     }
 }

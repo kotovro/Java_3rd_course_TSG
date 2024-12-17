@@ -17,12 +17,18 @@ public class PermissionsService {
     @Setter
     private RepositoryProvider repositoryProvider;
 
+    public int getUserIdFromToken(String token) {
+        //TODO validate token
+        return Integer.parseInt(token);
+    }
+
     public ViewModel applyPermissions(ViewModel vm) {
         IUserRepository userRep = repositoryProvider.getUserRepository();
-        User user = userRep.getUserByToken(vm.getUserToken());
+        int userId = getUserIdFromToken(vm.getUserToken());
+        User user = userRep.getUserById(userId);
 
         if (user.getRoles().isEmpty()) {
-            return vm;
+            return new ViewModel();
         }
         IRoleRepository roleRep = repositoryProvider.getRoleRepository();
         List<Permission> currentUserPermissions = new LinkedList<>();
