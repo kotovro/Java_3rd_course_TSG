@@ -33,7 +33,8 @@ public class RequestServlet extends HttpServlet {
             case "/getList":
             {
                 resp.setContentType("application/json");
-                out.println(getRequestListHTML(token));
+                out.println(WebUtils.generateList(
+                        ActionProviderContainer.getRequestActionProvider(), token));
                 break;
             }
             case "/show":
@@ -50,7 +51,8 @@ public class RequestServlet extends HttpServlet {
             }case "/delete": {
                 resp.setContentType("application/json");
                 deleteRequest(param, token);
-                out.println(getRequestListHTML(token));
+                out.println(WebUtils.generateList(
+                        ActionProviderContainer.getRequestActionProvider(), token));
                 break;
             }
 
@@ -136,43 +138,6 @@ public class RequestServlet extends HttpServlet {
         return webSelects;
     }
 
-    private String getRequestListHTML(String token) {
-        IActionProvider requestActionProvider = ActionProviderContainer.getRequestActionProvider();
-
-        Action getList = requestActionProvider.getActionList(null, null, null, null);
-        ControllerService controllerService = new ControllerService();
-        ViewModel viewModel = controllerService.doAction(getList, null, token);
-
-        PageContent pageContent = new PageContent();
-        List<WebListItem> listItems = pageContent.getListItems();
-        List<WebButton> listButtons = pageContent.getButtons();
-
-        for (Action action: viewModel.getActionsList()) {
-            if (action.isListItem()) {
-                listItems.add(new WebListItem("",
-                        action.getRoute() +
-                                "?token=" + token +
-                                "&param=" + action.getParameter(),
-                        WebUtils.sanitizeOutput(action.getActionName())));
-            } else if (action.isInteractive() && action.getActionName() != null) {
-                listButtons.add(new WebButton("",
-                        WebUtils.sanitizeOutput(action.getActionName()),
-                        action.getRoute() +
-                                "?token=" + token +
-                                "&param=" + action.getParameter(),
-                        action.getActionType().equals(Action.ActionType.UPDATE)
-                                ? ButtonType.UPDATE
-                                : ButtonType.GET
-                ));
-            }
-        }
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-            return mapper.writeValueAsString(pageContent);
-        } catch (Exception e) {
-            return "";
-        }
-    }
     private String getRequestUpdateResult(HttpServletRequest req) {
         String param = req.getParameter("param");
         String token = req.getParameter("token");

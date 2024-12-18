@@ -43,6 +43,10 @@ public class RoleService {
         parameters.add(new ViewField("Permissions\n", "", false, false));
         parameters.add(new ViewField("Role name", role.getName(), true, true));
 
+        int roleCount = roleRep.getUserRolesCount(roleId);
+        parameters.add(new ViewField("Users with role", Integer.toString(roleCount), false, true));
+
+
         List<Permission> rolePermissions = role.getPermissions();
         IActionProvider permissionProvider = ActionProviderContainer.getPermissionActionProvider();
         for (Permissions perm : Permissions.values()) {

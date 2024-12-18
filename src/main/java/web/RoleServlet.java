@@ -37,8 +37,10 @@ public class RoleServlet extends HttpServlet {
 
         switch (pathInfo) {
             case "/getList": {
+
                 resp.setContentType("application/json");
-                out.println(getRoleListHTML(token));
+                out.println(WebUtils.generateList(
+                        ActionProviderContainer.getRoleActionProvider(), token));
                 break;
             }
             case "/show":
@@ -58,7 +60,8 @@ public class RoleServlet extends HttpServlet {
             case "/delete": {
                 resp.setContentType("application/json");
                 deleteRole(param, token);
-                out.println(getRoleListHTML(token));
+                out.println(WebUtils.generateList(
+                        ActionProviderContainer.getRoleActionProvider(), token));
                 break;
             }
 
@@ -221,39 +224,4 @@ public class RoleServlet extends HttpServlet {
         return WebUtils.sanitizeOutput(errorMessage);
     }
 
-    private String getRoleListHTML(String token) {
-        IActionProvider roleActionProvider = ActionProviderContainer.getRoleActionProvider();
-
-        Action getList = roleActionProvider.getActionList(null, null, null, null);
-        ControllerService controllerService = new ControllerService();
-        ViewModel viewModel = controllerService.doAction(getList, null, token);
-
-        PageContent pageContent = new PageContent();
-        List<WebListItem> listItems = pageContent.getListItems();
-        List<WebButton> listButtons = pageContent.getButtons();
-
-        for (Action action : viewModel.getActionsList()) {
-            if (action.isListItem()) {
-                listItems.add(new WebListItem("",
-                        WebUtils.sanitizeOutput(action.getRoute()) +
-                                "?token=" + token +
-                                "&param=" + WebUtils.sanitizeOutput(action.getParameter()),
-                        WebUtils.sanitizeOutput(action.getActionName())));
-            } else if (action.isInteractive() && action.getActionName() != null) {
-                listButtons.add(new WebButton("",
-                        WebUtils.sanitizeOutput(action.getActionName()),
-                        WebUtils.sanitizeOutput(action.getRoute()) +
-                                "?token=" + token +
-                                "&param=" + WebUtils.sanitizeOutput(action.getParameter()),
-                        GET));
-            }
-        }
-
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-            return mapper.writeValueAsString(pageContent);
-        } catch (Exception e) {
-            return "";
-        }
-    }
 }
