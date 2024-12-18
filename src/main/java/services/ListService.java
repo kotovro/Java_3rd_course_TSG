@@ -3,8 +3,10 @@ package services;
 import models.entities.*;
 import models.repositories.RepositoryProvider;
 import models.repositories.interfaces.IResidentRepository;
+import models.repositories.interfaces.IRoleRepository;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class ListService {
@@ -35,5 +37,11 @@ public class ListService {
             permissionsList.add(new ListItem(permissionLevel.name(), permissionLevel.name()));
         }
         return permissionsList;
+    }
+
+    public static List<ListItem> getRolesList() {
+        IRoleRepository rolesRepository = RepositoryProvider.getInstance().getRoleRepository();
+        List<Role> list = rolesRepository.getRoleList();
+        return list.stream().map(r -> {return new ListItem(Integer.toString(r.getId()), r.getName());}).toList();
     }
 }

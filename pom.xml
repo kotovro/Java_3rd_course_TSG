@@ -58,6 +58,27 @@
                 <version>3.8.1</version>
             </plugin>
 
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.0.0</version>
+                <configuration>
+                    <executable>cmd</executable>
+                    <arguments>
+                        <argument>/c</argument>
+                        <argument>"C:\VSU courses\MaintanenceCompany\runwar.bat"</argument>
+                    </arguments>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>integration-test</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
 
     </build>
@@ -68,4 +89,6 @@
             <url>https://repo.maven.apache.org/maven2/</url>
         </repository>
     </repositories>
+
+
 </project>

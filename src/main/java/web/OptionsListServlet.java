@@ -36,9 +36,23 @@ public class OptionsListServlet extends HttpServlet {
                 break;
             case "/permission":
                 list = getPermissionList(token);
+                break;
+            case "/roles":
+                list = getRolesList(token);
+                break;
         }
         resp.setContentType("application/json");
         resp.getWriter().print(list);
+    }
+
+    private String getRolesList(String token) {
+        ListItem[] list = ListService.getRolesList().toArray(new ListItem[0]);
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            return mapper.writeValueAsString(new JSONResult(list));
+        } catch (Exception e) {
+            return "";
+        }
     }
 
     private String getResidentList(String token) {

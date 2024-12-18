@@ -7,6 +7,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import models.entities.ListItem;
 import services.actionProviders.ActionProviderContainer;
 import services.actionProviders.IActionProvider;
 import view.Action;
@@ -17,6 +18,7 @@ import web.page.elements.*;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -56,44 +58,6 @@ public class UserServlet extends HttpServlet {
         }
     }
 
-
-//    private static String getUserHTML(String param, String token) {
-//        Action showUser = ActionProviderContainer
-//                .getUserActionProvider().getActionShow(param, "", null, null, true);
-//        ControllerService controllerService = new ControllerService();
-//        ViewModel viewModel = controllerService.doAction(showUser, null, token);
-//        StringBuilder stringBuilder = new StringBuilder("<div style='padding-top: 10px;padding-bottom: 30px'></div><div class='row g-3'>");
-//        for (ViewField viewField: viewModel.getParameters()) {
-//            if (viewField.isDisplayable()) {
-////                String fieldId = viewField.isList()
-////                        ? viewField.getValueFrom().getAttributeName().replace(' ', '_')
-////                        :  viewField.getAttributeName().replace(' ', '_');
-//                stringBuilder.append("<div class=col-md-4>")
-//                        .append("<label class='form-label' for='")
-//                        .append(viewField.getAttributeName()).append("'>")
-//                        .append(viewField.getAttributeName())
-//                        .append("</label>");
-//                if (viewField.isList()) {
-//                    stringBuilder.append("<select class='form-control' id='").append(viewField.getAttributeValue()).append("'")
-//                            .append(" data-ajax--cache='true' data-ajax--url='").append(viewField.getDataSource()).append("?token=").append(token).append("'>")
-//                            .append("<option selected='selected' value='").append(viewField.getValueFrom().getAttributeValue()).append("'>")
-//                            .append(viewField.getAttributeValue()).append("</option>")
-//                            .append("</select>");
-//                } else {
-//                    stringBuilder
-//                            .append("<input type='text' class='form-control'")
-//                            .append(" value='").append(viewField.getAttributeValue()).append("'")
-//                            .append(" id='").append(viewField.getAttributeName()).append("'")
-//                            .append(!viewField.isChangeable() ? " disabled='true'" : "")
-//                            .append("/>");
-//                }
-//                stringBuilder.append("</div>");
-//            }
-//        }
-//        stringBuilder.append("</div>");
-//        return stringBuilder.toString();
-//    }
-
     private static String getUserHTML(String param, String token) {
         Action showRole = ActionProviderContainer
                 .getUserActionProvider().getActionShow(param, "", null, null, true);
@@ -104,6 +68,7 @@ public class UserServlet extends HttpServlet {
         pageContent.getInputs().addAll(getPartHTMLViewFields(token, viewModel));
         pageContent.getSelects().addAll(getPartHTMLSelect(token, viewModel));
         pageContent.getButtons().addAll(getPartHTMLButtons(token, viewModel));
+        pageContent.getMultipleSelects().addAll(getPartHTMLSMultipleSelect(token, viewModel));
 
         ObjectMapper mapper = new ObjectMapper();
         try {
@@ -111,6 +76,28 @@ public class UserServlet extends HttpServlet {
         } catch (Exception e) {
             return "";
         }
+    }
+
+    private static List<WebMultiSelect> getPartHTMLSMultipleSelect(String token, ViewModel viewModel) {
+        List<WebMultiSelect> selectList = new LinkedList<>();
+        List<ListItem> options = new LinkedList<>();
+        WebMultiSelect select = null;
+        for (ViewField viewField : viewModel.getParameters()) {
+            if (viewField.isDisplayable() && viewField.isListMultiple()) {
+                if (select == null) {
+                    select = new WebMultiSelect("roles", "Roles", viewField.getDataSource()  + "?token=" + token, options);
+                }
+                String optionId = WebUtils.sanitizeOutput(
+                        viewField.getAttributeValue());
+                String optionText = WebUtils.sanitizeOutput(
+                        viewField.getAttributeName());
+                options.add(new ListItem(optionId, optionText));
+            }
+        }
+        if (select != null) {
+            selectList.add(select);
+        }
+        return selectList;
     }
 
     private static List<WebSelect> getPartHTMLSelect(String token, ViewModel viewModel) {
@@ -164,7 +151,7 @@ public class UserServlet extends HttpServlet {
     private static List<WebInput> getPartHTMLViewFields(String token, ViewModel viewModel) {
         List<WebInput> webInputs = new LinkedList<>();
         for (ViewField viewField : viewModel.getParameters()) {
-            if (viewField.isDisplayable() && !viewField.isList()) {
+            if (viewField.isDisplayable() && !viewField.isList() && !viewField.isListMultiple()) {
                 String fieldId = WebUtils.sanitizeOutput(
                         viewField.getAttributeName().replace(' ', '_'));
                 webInputs.add(new WebInput(fieldId,

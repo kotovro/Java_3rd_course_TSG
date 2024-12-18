@@ -49,12 +49,21 @@ public class UserService {
         }
 
         List<ViewField> parameters = vm.getParameters();
-        parameters.add(new ViewField("User Id", userIdStr, false, false));
-        parameters.add(new ViewField("Login", user.getLogin(), true, false));
-        parameters.add(new ViewField("Password", user.getPassword(), true, false));
+        parameters.add(new ViewField("User Id", userIdStr, false, true));
+        parameters.add(new ViewField("Login", user.getLogin(),userId < 0, true));
+        if (userId < 0) {
+            parameters.add(new ViewField("Password", "", true, true));
+        }
         List<Role> roles = userRep.getRoleList(userId);
+        if (roles.isEmpty()) {
+            parameters.add(new ViewField("NO ROLES", Integer.toString(-1),
+                    false, true, null, false, true, false,
+                    ListRouteProvider.getRoute(RouteType.ROLE)));
+            }
         for (Role role : roles) {
-            parameters.add(new ViewField("Role", role.getName(), false, true));
+            parameters.add(new ViewField(role.getName(), Integer.toString(role.getId()),
+                    false, true, null, false, true, false,
+                    ListRouteProvider.getRoute(RouteType.ROLE)));
         }
         IActionProvider userActionProvider = ActionProviderContainer.getUserActionProvider();
         Action show = userActionProvider.getActionShow(userIdStr, "", null, null, false);
@@ -63,7 +72,7 @@ public class UserService {
         vm.addCommand(update);
 
         if (userId > 0) {
-            Action add = userActionProvider.getActionAdd("", "Add", update, update);
+            Action add = userActionProvider.getActionAdd("-1", "Add", update, update);
             vm.addCommand(add);
 
             Action delete = userActionProvider.getActionDelete(userIdStr, "Delete", back, back);

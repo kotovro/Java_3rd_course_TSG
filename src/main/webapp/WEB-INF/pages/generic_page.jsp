@@ -58,6 +58,24 @@
         <div id="content"></div>
     </form>
     <script type="text/javascript">
+        const addMultiSelects = function (list, target)  {
+            const selectContainer = $("<div class='row g-3'></div>").appendTo(target);
+            for (let i = 0; i < list.length; i++) {
+                let optionsList = '';
+                for (let  j = 0; j < list[i].options.length; j++) {
+                    optionsList += "<option selected='selected' value='" + list[i].options[j].id + "' >" +
+                        list[i].options[j].text + "</option>";
+                }
+                selectContainer.append(
+                    "<div class=col-md-3>" +
+                    "<label class='form-label' for='" + list[i].id + "'>" + list[i].label + "</label>" +
+                    "<select class='form-control' id='" + list[i].id + "' data-close-on-select='false' data-ajax--cache='true' data-ajax--url='" +
+                    list[i].optionsURL + "' multiple>"  + optionsList +
+                    "</select>" +
+                    "</div>"
+                );
+            }
+        };
         const addSelects = function (list, target)  {
             const selectContainer = $("<div class='row g-3'></div>").appendTo(target);
             for (let i = 0; i < list.length; i++) {
@@ -71,7 +89,7 @@
                     "</div>"
                 );
             }
-        }
+        };
 
         const addInputs = function (list, target) {
             const inputContainer = $("<div class='row g-3'></div>").appendTo(target);
@@ -85,7 +103,7 @@
                 );
             }
 
-        }
+        };
 
         const addButtons = function (list, target) {
             const buttonContainer = $("<div style='padding-top: 10px;padding-bottom: 10px'></div>").appendTo(target);
@@ -94,7 +112,7 @@
                     (list[i].buttonType == "GET" ? "'getContent(\"" : "'updateContent(\"") + list[i].url + "\");'>" +
                     list[i].text + "</button>");
             }
-        }
+        };
 
         const addListItems = function (list, target) {
             const listContainer = $("<div class='list-group'></div>").appendTo(target);
@@ -102,7 +120,7 @@
                 listContainer.append("<a class='list-group-item list-group-item-action' href='#' onclick='getContent(\"" +
                     list[i].url + "\");'>" + list[i].text + "</a>");
             }
-        }
+        };
         const createContent = function (contentObj) {
             const contentDiv = $("#content");
             contentDiv.empty();
@@ -118,11 +136,14 @@
                 if (contentObj.selects.length > 0) {
                     addSelects(contentObj.selects, content);
                 }
+                if (contentObj.multipleSelects.length > 0) {
+                    addMultiSelects(contentObj.multipleSelects, content);
+                }
                 if (contentObj.buttons.length > 0) {
                     addButtons(contentObj.buttons, content);
                 }
             }
-        }
+        };
         const getContent = function (route) {
             $("#errorMessage").empty().css('display', 'none');
 
@@ -137,7 +158,7 @@
                     }
                 },
             });
-        }
+        };
         const updateContent = function (route) {
             let postData = {};
             $("#errorMessage").empty().css('display', 'none');
@@ -166,7 +187,7 @@
                     }
                 },
             });
-        }
+        };
     </script>
 </div>
 
