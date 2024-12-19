@@ -51,24 +51,22 @@ public class UserService {
         List<ViewField> parameters = vm.getParameters();
         parameters.add(new ViewField("User Id", userIdStr, false, true));
         parameters.add(new ViewField("Login", user.getLogin(),userId < 0, true));
-        if (userId < 0) {
-            parameters.add(new ViewField("Password", "", true, true));
-        }
+        parameters.add(new ViewField("Password", "", userId < 0, userId < 0));
         List<Role> roles = userRep.getRoleList(userId);
         if (roles.isEmpty()) {
             parameters.add(new ViewField("NO ROLES", Integer.toString(-1),
-                    false, true, null, false, true, false,
+                    true, true, null, false, true, false,
                     ListRouteProvider.getRoute(RouteType.ROLE)));
             }
         for (Role role : roles) {
             parameters.add(new ViewField(role.getName(), Integer.toString(role.getId()),
-                    false, true, null, false, true, false,
+                    true, true, null, false, true, false,
                     ListRouteProvider.getRoute(RouteType.ROLE)));
         }
         IActionProvider userActionProvider = ActionProviderContainer.getUserActionProvider();
         Action show = userActionProvider.getActionShow(userIdStr, "", null, null, false);
         Action back = userActionProvider.getActionBack("", "Back to users list");
-        Action update = userActionProvider.getActionUpdate(userIdStr, "Update user", show, show);
+        Action update = userActionProvider.getActionUpdate(userIdStr, userId > 0 ? "Update user" : "Add user", show, show);
         vm.addCommand(update);
 
         if (userId > 0) {
@@ -126,11 +124,18 @@ public class UserService {
             user = rep.getUserById(id);
         }
         user.setLogin(viewModel.getFieldValueByAttributeName("Login"));
+
         String newPassword = viewModel.getFieldValueByAttributeName("Password");
         if (!newPassword.equals(user.getPassword())) {
             user.setPassword(newPassword);
             rep.hashUserPassword(user);
         }
+
+        List<Integer> roles = viewModel.getParameters().stream()
+                .filter(ViewField::isListMultiple)
+                .map(f -> Integer.parseInt(f.getAttributeValue()))
+                .toList();
+        user.setRoles(roles);
         id = rep.updateUser(user);
 
         return fillView(Integer.toString(id));

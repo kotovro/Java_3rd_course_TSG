@@ -21,6 +21,10 @@ public class ViewField {
     private String dataSource;
 
 
+
+    public ViewField() {
+
+    }
     public ViewField(String attributeName, String attributeValue, boolean isChangeable, boolean isDisplayable) {
         this.attributeName = attributeName;
         this.attributeValue = attributeValue;

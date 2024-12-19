@@ -9,10 +9,9 @@ import javax.crypto.spec.PBEKeySpec;
 import java.security.SecureRandom;
 import java.security.spec.KeySpec;
 import java.sql.*;
-import java.util.Base64;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.locks.ReadWriteLock;
+import java.util.stream.Collectors;
 
 public class UserRepositorySQL extends PostgreDBRepository implements IDataBaseConnection, IUserRepository {
 
@@ -41,36 +40,61 @@ public class UserRepositorySQL extends PostgreDBRepository implements IDataBaseC
             return -1;
         }
         int usrId = -1;
-        PreparedStatement statement = null;
+        PreparedStatement statementAddUser = null;
         try {
-            statement = connection.prepareStatement("INSERT INTO \"user\" (login, password, password_salt) VALUES (?, ?, ?) returning user_id");
-            statement.setString(1, user.getLogin());
-            statement.setString(2, user.getPassword());
-            statement.setBytes(3, user.getPasswordSalt());
-            ResultSet resultSet = statement.executeQuery();
+            statementAddUser = connection.prepareStatement("INSERT INTO \"user\" (\"login\", \"password\", password_salt, active) VALUES (?, ?, ?, ?) returning user_id");
+            statementAddUser.setString(1, user.getLogin());
+            statementAddUser.setString(2, user.getPassword());
+            statementAddUser.setBytes(3, user.getPasswordSalt());
+            statementAddUser.setBoolean(4, user.isActive());
+            ResultSet resultSet = statementAddUser.executeQuery();
             if (resultSet.next()) {
                 usrId = resultSet.getInt("user_id");
                 user.setUserId(usrId);
+
+                if (!user.getRoles().isEmpty()) {
+                    PreparedStatement statementAddUserRoles = getPreparedStatementForInsert(user.getRoles(), connection, usrId);
+                    statementAddUserRoles.executeUpdate();
+                    statementAddUserRoles.close();
+                }
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
         } finally {
-            closeConnection(connection, statement);
+            closeConnection(connection, statementAddUser);
         }
         return usrId;
     }
 
+    private static PreparedStatement getPreparedStatementForInsert(List<Integer> roles, Connection connection, int usrId) throws SQLException {
+        StringBuilder queryAddUserRoles = new StringBuilder("insert into user_role (user_id, role_id) values ");
+        StringBuilder queryValues = new StringBuilder("(?, ?)");
+
+        for (int i = 1; i < roles.size(); i++) {
+            queryValues.append(", (?, ?)");
+        }
+
+        queryAddUserRoles.append(queryValues);
+        PreparedStatement statementAddUserRoles = connection.prepareStatement(queryAddUserRoles.toString());
+        for (int i = 0; i < roles.size(); i++) {
+            statementAddUserRoles.setInt(1 + i * 2, usrId);
+            statementAddUserRoles.setInt(2 + i * 2, roles.get(i));
+        }
+        return statementAddUserRoles;
+    }
 
 
     @Override
     public User getUserById(int UserId) {
         User user = null;
         Connection connection = getConnection(url, username, password);
-        if (connection == null) {return null;}
+        if (connection == null) {
+            return null;
+        }
         PreparedStatement statement = null;
         try {
             statement = connection.prepareStatement("select * from \"user\" where \"user\".user_id=?");
-            statement.setInt(1,UserId);
+            statement.setInt(1, UserId);
             ResultSet resultSet = statement.executeQuery();
             if (resultSet == null) {
             }
@@ -82,7 +106,7 @@ public class UserRepositorySQL extends PostgreDBRepository implements IDataBaseC
                 user.setPasswordSalt(resultSet.getBytes("password_salt"));
                 List<Integer> userRoles = new LinkedList<>();
                 PreparedStatement statementForRoles = connection.prepareStatement("select role_id from \"user_role\" where user_id=?");
-                statementForRoles.setInt(1,UserId);
+                statementForRoles.setInt(1, UserId);
                 ResultSet resultSetForRoles = statementForRoles.executeQuery();
                 while (resultSetForRoles.next()) {
                     userRoles.add((resultSetForRoles.getInt("role_id")));
@@ -107,11 +131,11 @@ public class UserRepositorySQL extends PostgreDBRepository implements IDataBaseC
             return usr;
         }
 
-        PreparedStatement statement = null;
+        PreparedStatement statementAddUser = null;
         try {
-            statement = connection.prepareStatement("select * from \"user\" where \"user\".login=? ");
-            statement.setString(1, login);
-            ResultSet resultSet = statement.executeQuery();
+            statementAddUser = connection.prepareStatement("select * from \"user\" where \"user\".login=? ");
+            statementAddUser.setString(1, login);
+            ResultSet resultSet = statementAddUser.executeQuery();
             if (!resultSet.next()) {
                 return usr;
             }
@@ -139,7 +163,7 @@ public class UserRepositorySQL extends PostgreDBRepository implements IDataBaseC
             return usr;
 
         } finally {
-            closeConnection(connection, statement);
+            closeConnection(connection, statementAddUser);
         }
         return usr;
     }
@@ -155,12 +179,50 @@ public class UserRepositorySQL extends PostgreDBRepository implements IDataBaseC
         }
         PreparedStatement statement = null;
         try {
-            statement = connection.prepareStatement("update \"user\" set login=?, password=?, password_salt=? where user_id=?");
-            statement.setString(1, user.getLogin());
-            statement.setString(2, user.getPassword());
-            statement.setBytes(3, user.getPasswordSalt());
-            statement.setInt(4, user.getUserId());
-            statement.executeUpdate();
+            User oldUser = getUserById(userId);
+
+            if (!user.getLogin().equals(oldUser.getLogin()) ||
+                    !user.getPassword().equals(oldUser.getPassword()) ||
+                    !Arrays.equals(user.getPasswordSalt(), oldUser.getPasswordSalt())) {
+                statement = connection.prepareStatement("update \"user\" set login=?, password=?, password_salt=? where user_id=?");
+                statement.setString(1, user.getLogin());
+                statement.setString(2, user.getPassword());
+                statement.setBytes(3, user.getPasswordSalt());
+                statement.setInt(4, user.getUserId());
+                statement.executeUpdate();
+                statement.close();
+            }
+            Set<Integer> oldUserRoles = new HashSet<Integer>(oldUser.getRoles());
+            Set<Integer> newUserRoles = new HashSet<Integer>(user.getRoles());
+            Set<Integer> rolesToDelete = oldUserRoles.stream()
+                    .filter(e -> !newUserRoles.contains(e))
+                    .collect(Collectors.toSet());
+            Set<Integer> rolesToInsert = newUserRoles.stream()
+                    .filter(e -> !oldUserRoles.contains(e))
+                    .collect(Collectors.toSet());
+            if (!rolesToDelete.isEmpty()) {
+                StringBuilder deleteRoles = new StringBuilder("?");
+                for (int i = 1; i < rolesToDelete.size(); i++) {
+                    deleteRoles.append(", ?");
+                }
+
+                PreparedStatement statementDeleteRoles = connection.prepareStatement(
+                        "delete from \"user_role\" where user_id=? and role_id in (" + deleteRoles + ")");
+                statementDeleteRoles.setInt(1, userId);
+                List<Integer> dr = rolesToDelete.stream().toList();
+                for (int i = 0; i < rolesToDelete.size(); i++) {
+                    statementDeleteRoles.setInt(2 + i, dr.get(i));
+                }
+                statementDeleteRoles.executeUpdate();
+                statementDeleteRoles.close();
+            }
+
+            if (!rolesToInsert.isEmpty()) {
+                PreparedStatement statementInsertRoles = getPreparedStatementForInsert(
+                        rolesToInsert.stream().toList(), connection, userId);
+                statementInsertRoles.executeUpdate();
+                statementInsertRoles.close();
+            }
         } catch (Exception e) {
             throw new RuntimeException(e);
         } finally {

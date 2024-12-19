@@ -1,5 +1,7 @@
 package web;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import controller.ControllerService;
 import jakarta.servlet.ServletException;
@@ -8,8 +10,9 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import models.entities.ListItem;
+import services.ListRouteProvider;
+import services.RouteType;
 import services.actionProviders.ActionProviderContainer;
-import services.actionProviders.IActionProvider;
 import view.Action;
 import view.ViewField;
 import view.ViewModel;
@@ -17,13 +20,13 @@ import web.page.elements.*;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 @WebServlet("/User/*")
 public class UserServlet extends HttpServlet {
+
+    public static final String ROLES_ELEMENT_ID = "roles";
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String pathInfo = req.getPathInfo();
@@ -85,7 +88,7 @@ public class UserServlet extends HttpServlet {
         for (ViewField viewField : viewModel.getParameters()) {
             if (viewField.isDisplayable() && viewField.isListMultiple()) {
                 if (select == null) {
-                    select = new WebMultiSelect("roles", "Roles", viewField.getDataSource()  + "?token=" + token, options);
+                    select = new WebMultiSelect(ROLES_ELEMENT_ID, "Roles", viewField.getDataSource()  + "?token=" + token, options);
                 }
                 String optionId = WebUtils.sanitizeOutput(
                         viewField.getAttributeValue());
@@ -163,7 +166,7 @@ public class UserServlet extends HttpServlet {
         return webInputs;
     }
 
-    private String getUserUpdateResult(HttpServletRequest req) {
+    private String getUserUpdateResult(HttpServletRequest req) throws JsonProcessingException {
         String param = req.getParameter("param");
         String token = req.getParameter("token");
         Action showAction = ActionProviderContainer.getUserActionProvider().getActionShow(param, null, null, null, false);
@@ -171,9 +174,13 @@ public class UserServlet extends HttpServlet {
         ViewModel vm = controllerService.doAction(showAction, null, token);
         boolean isUserChanged = false;
         String errorMessage = "";
+        String roles = req.getParameter(ROLES_ELEMENT_ID);
+        List<String> roleIds = new LinkedList<>(List.of(roles.split(",")));
+        roleIds.removeIf(e -> e.equals("-1"));
 
+        List<ViewField> rolesToDelete = new LinkedList<>();
         for (ViewField viewField : vm.getParameters()) {
-            if (viewField.isChangeable()) {
+            if (viewField.isChangeable() && !viewField.isListMultiple()) {
                 String fieldId = WebUtils.sanitizeOutput(
                         viewField.isList()
                                 ? viewField.getValueFrom().getAttributeName().replace(' ', '_')
@@ -185,6 +192,21 @@ public class UserServlet extends HttpServlet {
                     isUserChanged = true;
                 }
             }
+            else if (viewField.isListMultiple() && viewField.isChangeable()) {
+                if (!roleIds.contains(viewField.getAttributeValue())) {
+                    rolesToDelete.add(viewField);
+                    if (!viewField.getAttributeValue().equals("-1")) {
+                        isUserChanged = true;
+                    }
+                }
+            }
+        }
+        vm.getParameters().removeAll(rolesToDelete);
+        for (String roleId : roleIds) {
+            vm.getParameters().add(new ViewField("", roleId,
+                    false, true, null, false, true, false,
+                    ""));
+            isUserChanged = true;
         }
 
         Action update = vm.getActionsList().stream()

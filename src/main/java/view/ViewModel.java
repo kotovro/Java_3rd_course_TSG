@@ -27,7 +27,7 @@ public class ViewModel  {
                 .stream()
                 .filter(f -> f.getAttributeName().equals(attributeName))
                 .findFirst()
-                .get()
+                .orElse(new ViewField())
                 .getAttributeValue();
     }
 }

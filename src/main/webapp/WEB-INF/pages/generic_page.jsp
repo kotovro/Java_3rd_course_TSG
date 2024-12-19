@@ -163,8 +163,7 @@
             let postData = {};
             $("#errorMessage").empty().css('display', 'none');
             $("#content input, #content select").each(function (idx, el) {
-                postData[$(el).prop("id")] = $(el).val();
-                //console.log($(el).prop("id") + " : "+ $(el).val());
+                postData[$(el).prop("id")] = typeof $(el).val() === 'object' ? $(el).val().join(',') : $(el).val();
             });
 
 
@@ -172,9 +171,6 @@
                 url: route,
                 async: false,
                 data: postData,
-                // type: "POST",
-                // processData: false,
-                // contentType: false,
                 cache: false,
                 success: () => {
                     alert("Update successful");

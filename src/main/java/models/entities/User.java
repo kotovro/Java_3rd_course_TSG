@@ -13,7 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 @EqualsAndHashCode
 public class User {
-    private int userId;
+    private int userId = -1;
     private String login;
     private String password;
     private boolean active = true;
