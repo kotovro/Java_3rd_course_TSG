@@ -6,7 +6,6 @@ import models.entities.Permissions;
 import models.entities.Role;
 import models.repositories.interfaces.IRoleRepository;
 
-import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -101,7 +100,7 @@ public class RoleRepositorySQL extends PostgreDBRepository implements IRoleRepos
         }
         PreparedStatement statement = null;
         try {
-            statement = connection.prepareStatement("select * from \"role\"");
+            statement = connection.prepareStatement("select * from \"role\" order by role_id asc");
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
                 Role role = new Role();

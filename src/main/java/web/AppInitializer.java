@@ -1,8 +1,5 @@
 package web;
 
-import applications.ConsoleApplication;
-import applications.IApplication;
-import controller.ControllerService;
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
 import jakarta.servlet.annotation.WebListener;
@@ -15,29 +12,20 @@ public class AppInitializer implements ServletContextListener {
     @Override
     public void contextInitialized(ServletContextEvent sce) {
         ConfigRepository configRep = ConfigRepository.getInstance("C:\\VSU courses\\MaintanenceCompany\\config.txt");
-//        testConnection(configRep);
-//        return;
 
         RepositoryProvider.init(configRep);
-        IActionProvider commentActionService = new CommentActionProvider();
-        IActionProvider requestActionService = new RequestActionProvider();
-        IActionProvider loginActionProvider = new LoginActionProvider();
-        IActionProvider userActionProvider = new UserActionProvider();
-        IActionProvider roleActionProvider = new RoleActionProvider();
-        IActionProvider permissionActionProvider = new PermissionActionProvider();
-        ActionProviderContainer.init(commentActionService,
-                requestActionService,
-                loginActionProvider,
-                userActionProvider,
-                roleActionProvider,
-                permissionActionProvider);
+        ActionProviderContainer.init(new CommentActionProvider(),
+                new RequestActionProvider(),
+                new LoginActionProvider(),
+                new UserActionProvider(),
+                new RoleActionProvider(),
+                new PermissionActionProvider(),
+                new PaginationActionProvider());
         System.out.println("Application is starting...");
-        // Perform initialization logic here, e.g., setting up resources, configs, etc.
     }
 
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
         System.out.println("Application is stopping...");
-        // Perform cleanup logic here.
     }
 }

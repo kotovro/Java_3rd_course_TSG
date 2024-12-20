@@ -14,6 +14,7 @@
     <!-- Include Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet"/>
+    <link href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" integrity="sha384-DyZ88mC6Up2uqS4h/KRgHuoeGwBcD4Ng9SiP4dIRy0EXTlnuz47vAwmeGwVChigm" crossorigin="anonymous" rel="stylesheet" />
     <style>
         .select2-container--default .select2-selection--single .select2-selection__arrow {
             height: 36px;
@@ -25,11 +26,28 @@
 
         .select2-container--default .select2-selection--single .select2-selection__rendered {
             line-height: 36px;
+            font-size: 14px;
         }
 
+        .pagination .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 20px;
+        }
+
+        .pagination .select2-container--default .select2-selection--single {
+            height: 22px;
+        }
+
+        .pagination .select2-container--default .select2-selection--single .select2-selection__rendered {
+            line-height: 20px;
+        }
         .btn-primary {
             margin: 10px 10px 10px 0;
         }
+
+        .pagination .fas {
+            font-size: 24px;
+        }
+
     </style>
 </head>
 <body>
@@ -121,6 +139,83 @@
                     list[i].url + "\");'>" + list[i].text + "</a>");
             }
         };
+
+        const addPagination = function (paginationInfo, target) {
+            let nav = $("<nav aria-label='Page navigation example'></nav>").appendTo(target);
+            let container = $("<ul class='pagination justify-content-center'></ul>").appendTo(nav);
+
+            const isFirstPage = paginationInfo.curPageNumber === "1";
+
+            const searchParams = new URLSearchParams(paginationInfo.lastPageRoute);
+            let lastPageNumber = 0;
+            if (searchParams.has("param"))
+                searchParams
+                    .get("param")
+                    .split(";")
+                    .forEach(
+                        (el) => {
+                            const arr = el.split(":")
+                            if (arr[0] === "pn")
+                                lastPageNumber = arr[1];
+                        }
+                    );
+            const isLastPage = lastPageNumber === paginationInfo.curPageNumber;
+
+            container
+                .append("<li class='page-item" + (isFirstPage ? " disabled" : "") + "'>" +
+                            "<a class='page-link' onclick='" + (isFirstPage
+                                ? "function() { return false; }"
+                                : "getContent(\"" + paginationInfo.firstPageRoute) + "\")'>" +
+                                "<i class='fas fa-angle-double-left'></i>" +
+                            "</a>" +
+                        "</li>")
+                .append("<li class='page-item" + (isFirstPage ? " disabled" : "") + "'>" +
+                            "<a class='page-link' onclick='" + (isFirstPage
+                                ? "function() { return false; }"
+                                : "getContent(\"" + paginationInfo.prevPageRoute) + "\")'>" +
+                            "<i class='fas fa-angle-left'></i>" +
+                            "</a>" +
+                        "</li>")
+                .append("<li class='page-item active'>" +
+                            "<span class='page-link'>" +
+                                "Page " + paginationInfo.curPageNumber + " of " + lastPageNumber +
+                            "</span>" +
+                        "</li>")
+                .append("<li class='page-item'>" +
+                            "<span class='page-link' style='display:flex;align-items:center;'>" +
+                                "<span style='padding-right:10px;'>Rows: </span><span>" + getSelectSizeHTML(paginationInfo.pageSize, paginationInfo.firstPageRoute) + "</span>" +
+                            "</span>" +
+                        "</li>")
+                .append("<li class='page-item" + (isLastPage ? " disabled" : "") + "'>" +
+                            "<a class='page-link' onclick='" + (isLastPage
+                                ? "function() { return false; }"
+                                : "getContent(\"" + paginationInfo.nextPageRoute) + "\")'>" +
+                            "<i class='fas fa-angle-right'></i>" +
+                            "</a>" +
+                        "</li>")
+                .append("<li class='page-item" + (isLastPage ? " disabled" : "") + "'>" +
+                            "<a class='page-link' onclick='" + (isLastPage
+                                ? "function() { return false; }"
+                                : "getContent(\"" + paginationInfo.lastPageRoute) + "\")'>" +
+                            "<i class='fas fa-angle-double-right'></i>" +
+                            "</a>" +
+                        "</li>");
+        };
+
+        const getSelectSizeHTML = function (curSize, firstPageRoute) {
+               const availableSizes = [5, 10, 15, 20, 50, 100];
+               let optionsText = "";
+               for (let i = 0; i < availableSizes.length; i++) {
+                   let el = availableSizes[i];
+                   optionsText += "<option value='" + el + "'" + (+curSize === el ? "selected" : "") + ">" + el + "</option>";
+               }
+             return "<select style='width:60px;' onchange='changeRows(this, \"" + firstPageRoute + "\")'>"  + optionsText + "</select>"
+        }
+
+        const changeRows = function (elem, route)  {
+            getContent(route.replace(new RegExp("ps:[0-9]+","gm"), "ps:" + elem.value));
+        }
+
         const createContent = function (contentObj) {
             const contentDiv = $("#content");
             contentDiv.empty();
@@ -141,6 +236,9 @@
                 }
                 if (contentObj.buttons.length > 0) {
                     addButtons(contentObj.buttons, content);
+                }
+                if (contentObj.paginationInfo) {
+                    addPagination(contentObj.paginationInfo, content);
                 }
             }
         };

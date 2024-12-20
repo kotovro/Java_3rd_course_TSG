@@ -40,7 +40,7 @@ public class RoleServlet extends HttpServlet {
 
                 resp.setContentType("application/json");
                 out.println(WebUtils.generateList(
-                        ActionProviderContainer.getRoleActionProvider(), token));
+                        ActionProviderContainer.getRoleActionProvider(), token, param));
                 break;
             }
             case "/show":
@@ -61,7 +61,7 @@ public class RoleServlet extends HttpServlet {
                 resp.setContentType("application/json");
                 deleteRole(param, token);
                 out.println(WebUtils.generateList(
-                        ActionProviderContainer.getRoleActionProvider(), token));
+                        ActionProviderContainer.getRoleActionProvider(), token, param));
                 break;
             }
 

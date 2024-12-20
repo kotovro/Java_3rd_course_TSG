@@ -27,7 +27,7 @@ public class LoginService {
         viewModel.addCommand(showRequest);
 
         IActionProvider userActionProvider = ActionProviderContainer.getUserActionProvider();
-        Action showUsers = userActionProvider.getActionList("", "Show users\n", null, null);
+        Action showUsers = userActionProvider.getActionList("ps:10;pn:1", "Show users\n", null, null);
         viewModel.addCommand(showUsers);
 
         IActionProvider role = ActionProviderContainer.getRoleActionProvider();

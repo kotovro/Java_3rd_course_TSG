@@ -10,4 +10,5 @@ public interface IRequestRepository {
     int updateRequest(Request request);
     void deleteRequest(int requestId);
     List<Request> getRequestList();
+    int getRequestByUser(int userId);
 }

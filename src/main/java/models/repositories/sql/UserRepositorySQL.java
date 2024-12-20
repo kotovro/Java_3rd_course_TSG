@@ -2,6 +2,7 @@ package models.repositories.sql;
 
 import models.entities.Role;
 import models.entities.User;
+import models.repositories.interfaces.IRequestRepository;
 import models.repositories.interfaces.IUserRepository;
 
 import javax.crypto.SecretKeyFactory;
@@ -267,12 +268,19 @@ public class UserRepositorySQL extends PostgreDBRepository implements IDataBaseC
 
     @Override
     public List<User> getUserList() {
+        return getUserList(1, 100);
+    }
+
+    @Override
+    public List<User> getUserList(int pageNumber, int pageSize) {
         Connection connection = getConnection(url, username, password);
         if (connection == null) return null;
         PreparedStatement statement = null;
         List<User> userList = new LinkedList<>();
         try {
-            statement = connection.prepareStatement("select * from \"user\" where active=true");
+            statement = connection.prepareStatement("select * from \"user\" where active=true order by \"login\" desc limit ? offset ?");
+            statement.setInt(1, pageSize);
+            statement.setInt(2, pageSize * (pageNumber - 1));
             ResultSet resultSet;
             try {
                 resultSet = statement.executeQuery();
@@ -286,11 +294,31 @@ public class UserRepositorySQL extends PostgreDBRepository implements IDataBaseC
                 userList.add(user);
             }
         } catch (Exception e) {
-
+            throw new RuntimeException(e);
         } finally {
             closeConnection(connection, statement);
         }
         return userList;
+    }
+
+    @Override
+    public int getUserCount() {
+        Connection connection = getConnection(url, username, password);
+        if (connection == null) return 0;
+        int usrCount = 0;
+        PreparedStatement statement = null;
+        try {
+            statement = connection.prepareStatement("select count(*) as \"user_count\" from \"user\" where active=true");
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                usrCount = resultSet.getInt("user_count");
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            closeConnection(connection, statement);
+        }
+        return usrCount;
     }
 
     @Override

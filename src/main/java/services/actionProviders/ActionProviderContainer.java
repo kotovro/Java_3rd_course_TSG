@@ -16,6 +16,8 @@ public class ActionProviderContainer {
     private static IActionProvider roleActionProvider;
     @Getter
     private static IActionProvider permissionActionProvider;
+    @Getter
+    private static PaginationActionProvider paginationActionProvider;
     private static ActionProviderContainer instance;
 
     public static void init(IActionProvider commentActionProvider,
@@ -23,14 +25,16 @@ public class ActionProviderContainer {
                             IActionProvider loginActionProvider,
                             IActionProvider userActionProvider,
                             IActionProvider roleActionProvider,
-                            IActionProvider permissionActionProvider) {
+                            IActionProvider permissionActionProvider,
+                            PaginationActionProvider paginationActionProvider) {
         if (instance == null) {
             instance = new ActionProviderContainer(commentActionProvider,
                                                     requestActionProvider,
                                                     loginActionProvider,
                                                     userActionProvider,
                                                     roleActionProvider,
-                                                    permissionActionProvider);
+                                                    permissionActionProvider,
+                                                    paginationActionProvider);
         }
     }
 
@@ -39,13 +43,15 @@ public class ActionProviderContainer {
                                     IActionProvider loginActionProvider,
                                     IActionProvider userActionProvider,
                                     IActionProvider roleActionProvider,
-                                    IActionProvider permissionActionProvider) {
+                                    IActionProvider permissionActionProvider,
+                                    PaginationActionProvider paginationActionProvider) {
         ActionProviderContainer.commentActionProvider = commentActionProvider;
         ActionProviderContainer.requestActionProvider = requestActionProvider;
         ActionProviderContainer.loginActionProvider = loginActionProvider;
         ActionProviderContainer.userActionProvider = userActionProvider;
         ActionProviderContainer.roleActionProvider = roleActionProvider;
         ActionProviderContainer.permissionActionProvider = permissionActionProvider;
+        ActionProviderContainer.paginationActionProvider = paginationActionProvider;
         ActionProviderContainer.instance = this;
     }
 }

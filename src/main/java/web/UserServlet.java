@@ -40,7 +40,7 @@ public class UserServlet extends HttpServlet {
             {
                 resp.setContentType("application/json");
                 out.println(WebUtils.generateList(
-                        ActionProviderContainer.getUserActionProvider(), token));
+                        ActionProviderContainer.getUserActionProvider(), token, param));
                 break;
             }
             case "/show":

@@ -55,4 +55,9 @@ public class RequestRepositoryInMemory implements IRequestRepository {
     public List<Request> getRequestList() {
         return requests;
     }
+
+    @Override
+    public int getRequestByUser(int userId) {
+        return (int) requests.stream().filter(r -> r.getAuthorId() == userId).count();
+    }
 }

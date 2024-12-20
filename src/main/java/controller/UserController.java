@@ -39,7 +39,7 @@ public class UserController extends AbstractController{
     }
 
     public ViewModel getList(String param) {
-        ViewModel vm = userService.getList();
+        ViewModel vm = userService.getList(param);
         vm.setUserToken(userToken);
         return permissionService.applyPermissions(vm);
     }

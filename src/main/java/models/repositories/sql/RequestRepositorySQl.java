@@ -159,4 +159,26 @@ public class RequestRepositorySQl extends PostgreDBRepository implements IReques
 
         return requestList;
     }
+
+    @Override
+    public int getRequestByUser(int userId) {
+        Connection connection = getConnection(url, username, password);
+        if (connection == null) {
+            return -1;
+        }
+        PreparedStatement preparedStatement = null;
+        try {
+            preparedStatement = connection.prepareStatement("select count(*) as request_count from \"request\" where author_id = ?");
+            preparedStatement.setInt(1, userId);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                return resultSet.getInt("request_count");
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }  finally {
+            closeConnection(connection, preparedStatement);
+        }
+        return 0;
+    }
 }

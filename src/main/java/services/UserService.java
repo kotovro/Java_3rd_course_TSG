@@ -9,8 +9,10 @@ import models.repositories.interfaces.IStaffMemberRepository;
 import models.repositories.interfaces.IUserRepository;
 import services.actionProviders.ActionProviderContainer;
 import services.actionProviders.IActionProvider;
+import services.actionProviders.PaginationActionProvider;
 import services.actionProviders.RoleActionProvider;
 import view.Action;
+import view.PaginationControls;
 import view.ViewField;
 import view.ViewModel;
 
@@ -29,7 +31,18 @@ public class UserService {
     private RepositoryProvider repositoryProvider;
 
 
-    public ViewModel fillView(String userIdStr) {
+    public ViewModel fillView(String param) {
+
+        String userIdStr = "-1";
+        String[] params = param.split(";");
+        for (String kvPair: params) {
+            String[] keyValue = kvPair.split(":");
+            if (keyValue[0].equals("id")) {
+                userIdStr = keyValue[1];
+            }
+        }
+
+        String pagingParams = param.replace("id:" + userIdStr, "");
         int userId = Integer.parseInt(userIdStr);
         ViewModel vm = new ViewModel();
 
@@ -52,6 +65,14 @@ public class UserService {
         parameters.add(new ViewField("User Id", userIdStr, false, true));
         parameters.add(new ViewField("Login", user.getLogin(),userId < 0, true));
         parameters.add(new ViewField("Password", "", userId < 0, userId < 0));
+
+        IRequestRepository requestRep = repositoryProvider.getRequestRepository();
+        parameters.add(new ViewField(
+                "Requests by this user",
+                            Integer.toString(requestRep.getRequestByUser(userId)),
+                false,
+                true));
+
         List<Role> roles = userRep.getRoleList(userId);
         if (roles.isEmpty()) {
             parameters.add(new ViewField("NO ROLES", Integer.toString(-1),
@@ -65,7 +86,7 @@ public class UserService {
         }
         IActionProvider userActionProvider = ActionProviderContainer.getUserActionProvider();
         Action show = userActionProvider.getActionShow(userIdStr, "", null, null, false);
-        Action back = userActionProvider.getActionBack("", "Back to users list");
+        Action back = userActionProvider.getActionBack(pagingParams, "Back to users list");
         Action update = userActionProvider.getActionUpdate(userIdStr, userId > 0 ? "Update user" : "Add user", show, show);
         vm.addCommand(update);
 
@@ -86,11 +107,22 @@ public class UserService {
         return vm;
     }
 
-    public ViewModel getList() {
+    public ViewModel getList(String pageParams) {
         ViewModel viewModel = new ViewModel();
         viewModel.setTitle("Users list");
+        String[] params = pageParams.split(";");
+        int pageNumber = 1;
+        int pageSize = 10;
+        for (String kvPair: params) {
+            String[] keyValue = kvPair.split(":");
+            if (keyValue[0].equals("pn")) {
+                pageNumber = Integer.parseInt(keyValue[1]);
+            } else if (keyValue[0].equals("ps")) {
+                pageSize = Integer.parseInt(keyValue[1]);
+            }
+        }
         IUserRepository rep = repositoryProvider.getUserRepository();
-        List<User> usrList = rep.getUserList();
+        List<User> usrList = rep.getUserList(pageNumber, pageSize);
         IActionProvider userActionProvider = ActionProviderContainer.getUserActionProvider();
         for (User user : usrList)
         {
@@ -101,6 +133,12 @@ public class UserService {
         Action updateNew = userActionProvider.getActionUpdate("-1", "", null, null);
         Action add = userActionProvider.getActionAdd("-1", "Add new user", updateNew, null);
         viewModel.getActionsList().add(add);
+
+        Action actionList = userActionProvider.getActionList("", "", null, null);
+        PaginationActionProvider paginationActionProvider = ActionProviderContainer.getPaginationActionProvider();
+        int userCount = rep.getUserCount();
+        viewModel.getActionsList().addAll(paginationActionProvider.getPaginationActions(actionList, userCount, pageNumber, pageSize));
+
         Action exit = new Action();
         exit.setActionType(Action.ActionType.EXIT);
         viewModel.getActionsList().add(exit);

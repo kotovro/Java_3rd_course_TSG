@@ -19,7 +19,8 @@ public class Action {
         RETURN,
         SHOW,
         EXIT,
-        BACK
+        BACK,
+        PAGINATION
     }
 
     private ActionType actionType;

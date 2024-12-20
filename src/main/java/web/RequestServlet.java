@@ -34,7 +34,7 @@ public class RequestServlet extends HttpServlet {
             {
                 resp.setContentType("application/json");
                 out.println(WebUtils.generateList(
-                        ActionProviderContainer.getRequestActionProvider(), token));
+                        ActionProviderContainer.getRequestActionProvider(), token, param));
                 break;
             }
             case "/show":
@@ -52,7 +52,7 @@ public class RequestServlet extends HttpServlet {
                 resp.setContentType("application/json");
                 deleteRequest(param, token);
                 out.println(WebUtils.generateList(
-                        ActionProviderContainer.getRequestActionProvider(), token));
+                        ActionProviderContainer.getRequestActionProvider(), token, param));
                 break;
             }
 

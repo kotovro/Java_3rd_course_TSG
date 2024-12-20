@@ -96,9 +96,15 @@ public class UserRepositoryInMemory implements IUserRepository {
     }
 
     @Override
+    public int getUserCount() {
+        return users.size();
+    }
+
+    @Override
     public List<Role> getRoleList(int userId) {
         return List.of();
     }
+
 
     @Override
     public int updateUser(User user) {
@@ -111,5 +117,6 @@ public class UserRepositoryInMemory implements IUserRepository {
         }
         return user.getUserId();
     }
+
 
 }

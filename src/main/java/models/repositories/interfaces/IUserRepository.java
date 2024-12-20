@@ -15,5 +15,11 @@ public interface IUserRepository {
     String getUserToken(int userId);
     void hashUserPassword(User user);
     List<User> getUserList();
+
+    default List<User> getUserList(int pageNumber, int pageSize) {
+        return getUserList();
+    }
+
+    int getUserCount();
     List<Role> getRoleList(int userId);
 }

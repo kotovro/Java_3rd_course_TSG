@@ -117,6 +117,7 @@ public class ConsoleApplication implements IApplication {
             case RETURN -> "Return";
             case SHOW -> "";
             case BACK -> "Back to list";
+            case PAGINATION -> "";
         };
     }
     private static void showCommands(ViewModel viewModel) {

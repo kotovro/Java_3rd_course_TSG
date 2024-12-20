@@ -31,6 +31,7 @@
                         content.append("<li class='nav-item'>")
                                     .append("<a class='nav-link' href='#' onclick='getContent(\"")
                                         .append(action.getRoute()).append("?token=").append(token)
+                                        .append("&param=").append(action.getParameter())
                                         .append("\");'>")
                                         .append(action.getActionName())
                                     .append("</a>")

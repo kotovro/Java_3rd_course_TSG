@@ -1,6 +1,7 @@
 package web.page.elements;
 
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -12,4 +13,6 @@ public class PageContent {
     private List<WebSelect> selects = new LinkedList<>();
     private List<WebListItem> listItems = new LinkedList<>();
     private List<WebMultiSelect> multipleSelects = new LinkedList<>();
+    @Setter
+    private PaginationInfo paginationInfo = null;
 }

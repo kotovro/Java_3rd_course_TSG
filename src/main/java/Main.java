@@ -5,14 +5,7 @@ import models.entities.*;
 import models.repositories.interfaces.*;
 import models.repositories.RepositoryProvider;
 import services.*;
-import services.actionProviders.CommentActionProvider;
-import services.actionProviders.IActionProvider;
-import services.actionProviders.LoginActionProvider;
-import services.actionProviders.RequestActionProvider;
-import services.actionProviders.RoleActionProvider;
-import services.actionProviders.UserActionProvider;
-import services.actionProviders.ActionProviderContainer;
-import services.actionProviders.PermissionActionProvider;
+import services.actionProviders.*;
 
 import view.Action;
 
@@ -166,19 +159,14 @@ public class Main {
 
         IApplication application = new ConsoleApplication();
         ControllerService controllerService = new ControllerService();
-        IActionProvider commentActionService = new CommentActionProvider();
-        IActionProvider requestActionService = new RequestActionProvider();
-        IActionProvider loginActionProvider = new LoginActionProvider();
-        IActionProvider userActionProvider = new UserActionProvider();
-        IActionProvider roleActionProvider = new RoleActionProvider();
-        IActionProvider permissionActionProvider = new PermissionActionProvider();
-        ActionProviderContainer.init(commentActionService,
-                                    requestActionService,
-                                    loginActionProvider,
-                                    userActionProvider,
-                                    roleActionProvider,
-                                    permissionActionProvider);
-        Action landing = loginActionProvider.getActionShow("", "", null, null, false);
+        ActionProviderContainer.init(new CommentActionProvider(),
+                                    new RequestActionProvider(),
+                                    new LoginActionProvider(),
+                                    new UserActionProvider(),
+                                    new RoleActionProvider(),
+                                    new PermissionActionProvider(),
+                                    new PaginationActionProvider());
+        Action landing = ActionProviderContainer.getLoginActionProvider().getActionShow("", "", null, null, false);
 //        Action login = loginActionProvider.getActionAdd("", "", landing, null);
         application.start(landing, controllerService);
 
