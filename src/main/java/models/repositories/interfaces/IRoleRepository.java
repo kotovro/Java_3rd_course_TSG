@@ -13,4 +13,9 @@ public interface IRoleRepository {
     void updateRolePermission(int roleId, Permission permission);
     void deleteRole(int id);
     int getUserRolesCount(int id);
+    default List<Role> getRoleList(int pageNumber, int pageSize) {
+        return getRoleList();
+    }
+
+    int getRoleCount();
 }

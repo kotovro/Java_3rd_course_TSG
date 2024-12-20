@@ -6,6 +6,7 @@ import models.repositories.RepositoryProvider;
 import models.repositories.interfaces.*;
 import services.actionProviders.ActionProviderContainer;
 import services.actionProviders.IActionProvider;
+import services.actionProviders.PaginationActionProvider;
 import view.Action;
 import view.ViewField;
 import view.ViewModel;
@@ -20,10 +21,22 @@ public class RoleService {
     @Setter
     private RepositoryProvider repositoryProvider;
 
-    public ViewModel fillView(String roleIdStr) {
-        int roleId = Integer.parseInt(roleIdStr);
-        ViewModel vm = new ViewModel();
 
+    public ViewModel fillView(String param) {
+
+        String roleIdStr = "-1";
+        String[] params = param.split(";");
+        for (String kvPair: params) {
+            String[] keyValue = kvPair.split(":");
+            if (keyValue[0].equals("id")) {
+                roleIdStr = keyValue[1];
+            }
+        }
+        int roleId = Integer.parseInt(roleIdStr);
+
+        String pagingParams = param.replace("id:" + roleIdStr, "");
+
+        ViewModel vm = new ViewModel();
         Role role;
         IRoleRepository roleRep = repositoryProvider.getRoleRepository();
         if (roleId > 0) {
@@ -52,9 +65,9 @@ public class RoleService {
         for (Permissions perm : Permissions.values()) {
             Permission rolePermission = new Permission(perm, PermissionLevel.NOT_ACCESSIBLE);
             rolePermissions.stream().filter(p -> p.getId().equals(perm)).findFirst().ifPresent(p -> {rolePermission.setLevel(p.getLevel());});
-            String param = roleIdStr + "/" + rolePermission.getId().getId();
-            Action updatePermission = permissionProvider.getActionUpdate(param, "", null, null);
-            Action addPermission = permissionProvider.getActionAdd(param,
+            String roleParam = roleIdStr + "/" + rolePermission.getId().getId();
+            Action updatePermission = permissionProvider.getActionUpdate(roleParam, "", null, null);
+            Action addPermission = permissionProvider.getActionAdd(roleParam,
                     rolePermission.getId().name() + " -> " + rolePermission.getLevel().name(),
                     updatePermission, null);
             addPermission.setListItem(true);
@@ -64,7 +77,7 @@ public class RoleService {
         }
         IActionProvider roleActionProvider = ActionProviderContainer.getRoleActionProvider();
         Action show = roleActionProvider.getActionShow(roleIdStr, "", null, null, false);
-        Action back = roleActionProvider.getActionBack("", "Back to roles list");
+        Action back = roleActionProvider.getActionBack(pagingParams, "Back to roles list");
         Action update = roleActionProvider.getActionUpdate(roleIdStr, roleId > 0 ? "Update role" : "Add role", show, show);
         vm.addCommand(update);
 
@@ -84,11 +97,22 @@ public class RoleService {
         return vm;
     }
 
-    public ViewModel getList() {
+    public ViewModel getList(String pageParams) {
         ViewModel viewModel = new ViewModel();
         viewModel.setTitle("Roles list");
+        String[] params = pageParams.split(";");
+        int pageNumber = 1;
+        int pageSize = 10;
+        for (String kvPair: params) {
+            String[] keyValue = kvPair.split(":");
+            if (keyValue[0].equals("pn")) {
+                pageNumber = Integer.parseInt(keyValue[1]);
+            } else if (keyValue[0].equals("ps")) {
+                pageSize = Integer.parseInt(keyValue[1]);
+            }
+        }
         IRoleRepository rep = repositoryProvider.getRoleRepository();
-        List<Role> reqList = rep.getRoleList();
+        List<Role> reqList = rep.getRoleList(pageNumber, pageSize);
         IActionProvider roleActionProvider = ActionProviderContainer.getRoleActionProvider();
         for (Role role : reqList)
         {
@@ -97,8 +121,14 @@ public class RoleService {
             viewModel.getActionsList().add(action);
         }
         Action updateNew = roleActionProvider.getActionUpdate("-1", "", null, null);
-        Action add = roleActionProvider.getActionAdd("-1", "Add new role", updateNew, null);
+        Action add = roleActionProvider.getActionAdd("id:-1;" + pageParams, "Add new role", updateNew, null);
         viewModel.getActionsList().add(add);
+
+        Action actionList = roleActionProvider.getActionList("", "", null, null);
+        PaginationActionProvider paginationActionProvider = ActionProviderContainer.getPaginationActionProvider();
+        int roleCount = rep.getRoleCount();
+        viewModel.getActionsList().addAll(paginationActionProvider.getPaginationActions(actionList, roleCount, pageNumber, pageSize));
+
         Action exit = new Action();
         exit.setActionType(Action.ActionType.EXIT);
         viewModel.getActionsList().add(exit);

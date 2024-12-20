@@ -90,9 +90,12 @@ public class RoleRepositorySQL extends PostgreDBRepository implements IRoleRepos
             closeConnection(connection, statement);
         }
     }
-
     @Override
     public List<Role> getRoleList() {
+        return getRoleList(1, 100);
+    }
+    @Override
+    public List<Role> getRoleList(int pageNumber, int pageSize) {
         List<Role> roleList = new LinkedList<>();
         Connection connection = getConnection(url, username, password);
         if (connection == null) {
@@ -100,7 +103,9 @@ public class RoleRepositorySQL extends PostgreDBRepository implements IRoleRepos
         }
         PreparedStatement statement = null;
         try {
-            statement = connection.prepareStatement("select * from \"role\" order by role_id asc");
+            statement = connection.prepareStatement("select * from \"role\" order by role_id asc limit ? offset ?");
+            statement.setInt(1, pageSize);
+            statement.setInt(2, pageSize * (pageNumber - 1));
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
                 Role role = new Role();
@@ -148,23 +153,9 @@ public class RoleRepositorySQL extends PostgreDBRepository implements IRoleRepos
         if (connection == null) {
             return;
         }
-        //PreparedStatement statement = null;
         PreparedStatement call = null;
         try {
             call = connection.prepareStatement("CALL update_user_permissions(?, ?, ?)");
-//            StringBuilder query = new StringBuilder("do ");
-//            query.append("$do$ ")
-//                    .append("begin ")
-//                    .append("update \"role_permission\" set permission_level_id = ? where role_id = ? and permission_name_id = ?; ")
-//                    .append("if not found then ")
-//                    .append("insert into \"role_permission\" (permission_name_id, permission_level_id, role_id) values (?, ?, ?); ")
-//                    .append("end if; ")
-//                    .append("end ");
-//                    //.append("$do$");
-//            call = connection.prepareCall(query.toString());
-//            call.setInt(1, permission.getLevel().getPriority());
-//            call.setInt(2, roleId);
-//            call.setInt(3, permission.getId().getId());
             call.setInt(1, roleId);
             call.setInt(2, permission.getId().getId());
             call.setInt(3, permission.getLevel().getPriority());
@@ -213,6 +204,26 @@ public class RoleRepositorySQL extends PostgreDBRepository implements IRoleRepos
             closeConnection(connection, preparedStatement);
         }
         return res;
+    }
+
+    @Override
+    public int getRoleCount() {
+        Connection connection = getConnection(url, username, password);
+        if (connection == null) return 0;
+        int roleCount = 0;
+        PreparedStatement statement = null;
+        try {
+            statement = connection.prepareStatement("select count(*) as \"role_count\" from \"role\"");
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                roleCount = resultSet.getInt("role_count");
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            closeConnection(connection, statement);
+        }
+        return roleCount;
     }
 
 }

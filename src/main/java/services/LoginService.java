@@ -22,7 +22,7 @@ public class LoginService {
         viewModel.setTitle("Main menu");
 
         IActionProvider requestActionProvider = ActionProviderContainer.getRequestActionProvider();
-        Action showRequest = requestActionProvider.getActionList("", "Show requests\n", null, null);
+        Action showRequest = requestActionProvider.getActionList("ps:10;pn:1", "Show requests\n", null, null);
         // add user to all actions
         viewModel.addCommand(showRequest);
 
@@ -31,7 +31,7 @@ public class LoginService {
         viewModel.addCommand(showUsers);
 
         IActionProvider role = ActionProviderContainer.getRoleActionProvider();
-        Action showRoles = role.getActionList("", "Show roles\n", null, null);
+        Action showRoles = role.getActionList("ps:10;pn:1", "Show roles\n", null, null);
         viewModel.addCommand(showRoles);
         //        IActionProvider userAction = ActionProviderContainer.getRequestActionProvider();
 //        Action updateNew = requestActionProvider.getActionUpdate("-1", "", null, null);

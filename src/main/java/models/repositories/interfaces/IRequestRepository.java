@@ -11,4 +11,9 @@ public interface IRequestRepository {
     void deleteRequest(int requestId);
     List<Request> getRequestList();
     int getRequestByUser(int userId);
+    default List<Request> getRequestList(int pageNumber, int pageSize) {
+        return getRequestList();
+    }
+
+    int getRequestCount();
 }

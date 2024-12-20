@@ -36,7 +36,7 @@ public class RoleController extends AbstractController {
     }
 
     public ViewModel getList(String param) {
-        ViewModel vm = roleService.getList();
+        ViewModel vm = roleService.getList(param);
         vm.setUserToken(userToken);
         return permissionService.applyPermissions(vm);
     }

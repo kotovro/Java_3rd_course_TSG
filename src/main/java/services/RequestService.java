@@ -13,6 +13,7 @@ import models.repositories.RepositoryProvider;
 import models.repositories.interfaces.IUserRepository;
 import services.actionProviders.ActionProviderContainer;
 import services.actionProviders.IActionProvider;
+import services.actionProviders.PaginationActionProvider;
 import view.Action;
 import view.ViewField;
 import view.ViewModel;
@@ -25,7 +26,17 @@ public class RequestService  {
     private RepositoryProvider repositoryProvider;
 
 
-    public ViewModel fillView(String requestIdStr) {
+    public ViewModel fillView(String param) {
+        String requestIdStr = "-1";
+        String[] params = param.split(";");
+        for (String kvPair: params) {
+            String[] keyValue = kvPair.split(":");
+            if (keyValue[0].equals("id")) {
+                requestIdStr = keyValue[1];
+            }
+        }
+
+        String pagingParams = param.replace("id:" + requestIdStr, "");
         int requestId = Integer.parseInt(requestIdStr);
         ViewModel requestMdlView = new ViewModel();
 
@@ -74,7 +85,7 @@ public class RequestService  {
 
         IActionProvider requestActionProvider = ActionProviderContainer.getRequestActionProvider();
         Action show = requestActionProvider.getActionShow(requestIdStr, "", null, null, false);
-        Action back = requestActionProvider.getActionBack("", "Back to requests list");
+        Action back = requestActionProvider.getActionBack(pagingParams, "Back to requests list");
         Action update = requestActionProvider.getActionUpdate(requestIdStr,
                 requestId > 0 ? "Update request" : "Add request", show, show);
         requestMdlView.addCommand(update);
@@ -100,11 +111,22 @@ public class RequestService  {
         return requestMdlView;
     }
 
-    public ViewModel getList() {
+    public ViewModel getList(String pageParams) {
+        String[] params = pageParams.split(";");
+        int pageNumber = 1;
+        int pageSize = 10;
+        for (String kvPair: params) {
+            String[] keyValue = kvPair.split(":");
+            if (keyValue[0].equals("pn")) {
+                pageNumber = Integer.parseInt(keyValue[1]);
+            } else if (keyValue[0].equals("ps")) {
+                pageSize = Integer.parseInt(keyValue[1]);
+            }
+        }
         ViewModel viewModel = new ViewModel();
         viewModel.setTitle("Requests list");
         IRequestRepository rep = repositoryProvider.getRequestRepository();
-        List<Request> reqList = rep.getRequestList();
+        List<Request> reqList = rep.getRequestList(pageNumber, pageSize);
         IActionProvider requestActionProvider = ActionProviderContainer.getRequestActionProvider();
         for (Request request : reqList)
         {
@@ -113,10 +135,15 @@ public class RequestService  {
             viewModel.getActionsList().add(action);
         }
         Action updateNew = requestActionProvider.getActionUpdate("-1", "", null, null);
-        Action add = requestActionProvider.getActionAdd("-1", "Add new request", updateNew, null);
-        //add action backToMainMenu
+        Action add = requestActionProvider.getActionAdd("id:-1;" + pageParams, "Add new request", updateNew, null);
         viewModel.getActionsList().add(add);
         Action exit = new Action();
+
+        Action actionList = requestActionProvider.getActionList("", "", null, null);
+        PaginationActionProvider paginationActionProvider = ActionProviderContainer.getPaginationActionProvider();
+        int requestCount = rep.getRequestCount();
+        viewModel.getActionsList().addAll(paginationActionProvider.getPaginationActions(actionList, requestCount, pageNumber, pageSize));
+
         exit.setActionType(Action.ActionType.EXIT);
         viewModel.getActionsList().add(exit);
         return viewModel;

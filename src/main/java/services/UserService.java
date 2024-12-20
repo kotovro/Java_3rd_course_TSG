@@ -131,7 +131,7 @@ public class UserService {
             viewModel.getActionsList().add(action);
         }
         Action updateNew = userActionProvider.getActionUpdate("-1", "", null, null);
-        Action add = userActionProvider.getActionAdd("-1", "Add new user", updateNew, null);
+        Action add = userActionProvider.getActionAdd("id:-1;" + pageParams, "Add new user", updateNew, null);
         viewModel.getActionsList().add(add);
 
         Action actionList = userActionProvider.getActionList("", "", null, null);

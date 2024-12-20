@@ -125,9 +125,13 @@ public class RequestRepositorySQl extends PostgreDBRepository implements IReques
     public void deleteRequest(int requestId) {
 
     }
-
     @Override
     public List<Request> getRequestList() {
+        return getRequestList(1, 100);
+    }
+
+    @Override
+    public List<Request> getRequestList(int pageNumber, int pageSize) {
         List<Request> requestList = new LinkedList<>();
         Connection connection = getConnection(url, username, password);
         if (connection == null) {
@@ -135,7 +139,9 @@ public class RequestRepositorySQl extends PostgreDBRepository implements IReques
         }
         PreparedStatement preparedStatement = null;
         try {
-            preparedStatement = connection.prepareStatement("select * from \"request\" order by request_id desc");
+            preparedStatement = connection.prepareStatement("select * from \"request\" order by \"request_id\" desc limit ? offset ?");
+            preparedStatement.setInt(1, pageSize);
+            preparedStatement.setInt(2, pageSize * (pageNumber - 1));
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 Request r = new Request();
@@ -180,5 +186,25 @@ public class RequestRepositorySQl extends PostgreDBRepository implements IReques
             closeConnection(connection, preparedStatement);
         }
         return 0;
+    }
+
+    @Override
+    public int getRequestCount() {
+        Connection connection = getConnection(url, username, password);
+        if (connection == null) return 0;
+        int reqCount = 0;
+        PreparedStatement statement = null;
+        try {
+            statement = connection.prepareStatement("select count(*) as \"request_count\" from \"request\"");
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                reqCount = resultSet.getInt("request_count");
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            closeConnection(connection, statement);
+        }
+        return reqCount;
     }
 }
