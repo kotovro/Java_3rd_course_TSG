@@ -4,21 +4,32 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.LinkedList;
+import java.util.List;
+
 @Getter
-@Setter
 @AllArgsConstructor
 public class ViewField {
+    @Setter
     private String attributeName;
+    @Setter
     private String attributeValue;
-
+    @Setter
     private boolean isChangeable;
-
+    @Setter
     private boolean isDisplayable;
+    @Setter
     private ViewField valueFrom = null;
+    @Setter
     private boolean isList = false;
+    @Setter
     private boolean isListMultiple = false;
+    @Setter
     private boolean isPagination = false;
+    @Setter
     private String dataSource;
+
+    private List<ValidationTypes> validators = new LinkedList<>();
 
 
 
@@ -41,4 +52,5 @@ public class ViewField {
         this.isList = isList;
         this.dataSource = dataSource;
     }
+
 }

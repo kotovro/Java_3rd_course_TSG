@@ -52,7 +52,11 @@ public class UserServlet extends HttpServlet {
             }
             case "/update":
             {
-                out.println(getUserUpdateResult(req));
+                String error = getUserUpdateResult(req);
+                if (!error.isEmpty()) {
+                    out.println(error);
+                    resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                }
                 break;
             }
             default:
@@ -205,7 +209,7 @@ public class UserServlet extends HttpServlet {
         for (String roleId : roleIds) {
             vm.getParameters().add(new ViewField("", roleId,
                     false, true, null, false, true, false,
-                    ""));
+                    "", null));
             isUserChanged = true;
         }
 

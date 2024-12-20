@@ -274,9 +274,9 @@
                     alert("Update successful");
                 },
                 error: (data) => {
-                    if (data && data !== "success") {
+                    if (data && data.responseJSON && data.responseJSON.errorMessage) {
                         $("#errorMessage")
-                            .append(data)
+                            .append(data.responseJSON.errorMessage)
                             .css('display', '');
                     }
                 },

@@ -17,6 +17,15 @@ import java.util.List;
 import static web.page.elements.ButtonType.GET;
 
 public class WebUtils {
+    public static String stringifyContent(PageContent content) {
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            return mapper.writeValueAsString(content);
+        } catch (Exception e) {
+            return "";
+        }
+    }
+
     public static String sanitizeOutput(String input) {
         if (input == null || input.isEmpty()) {
             return input;
@@ -90,11 +99,6 @@ public class WebUtils {
 
 
         pageContent.setPaginationInfo(new PaginationInfo(firstPage, prevPage, pageNumber, pageSize, nextPage, lastPage));
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-            return mapper.writeValueAsString(pageContent);
-        } catch (Exception e) {
-            return "";
-        }
+        return stringifyContent(pageContent);
     }
 }

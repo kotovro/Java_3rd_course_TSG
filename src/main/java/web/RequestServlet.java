@@ -46,7 +46,16 @@ public class RequestServlet extends HttpServlet {
             }
             case "/update":
             {
-                out.println(getRequestUpdateResult(req));
+                String errorMessage = getRequestUpdateResult(req);
+
+                if (errorMessage != null && !errorMessage.isEmpty())
+                {
+                    resp.setContentType("application/json");
+                    PageContent pageContent = new PageContent();
+                    pageContent.setErrorMessage(errorMessage);
+                    out.println(WebUtils.stringifyContent(pageContent));
+                    resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                }
                 break;
             }case "/delete": {
                 resp.setContentType("application/json");
@@ -81,12 +90,7 @@ public class RequestServlet extends HttpServlet {
         pageContent.getSelects().addAll(getSelectsHTML(token, viewModel));
         pageContent.getInputs().addAll(getInputsHTML(token, viewModel));
 
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-            return mapper.writeValueAsString(pageContent);
-        } catch (Exception e) {
-            return "";
-        }
+        return WebUtils.stringifyContent(pageContent);
     }
 
     private static List<WebInput> getInputsHTML(String token, ViewModel viewModel) {
@@ -160,6 +164,10 @@ public class RequestServlet extends HttpServlet {
                     isRequestChanged = true;
                 }
             }
+        }
+
+        if(!isRequestChanged) {
+            return "Nothing changed";
         }
 
         Action update = vm.getActionsList().stream()

@@ -77,12 +77,12 @@ public class UserService {
         if (roles.isEmpty()) {
             parameters.add(new ViewField("NO ROLES", Integer.toString(-1),
                     true, true, null, false, true, false,
-                    ListRouteProvider.getRoute(RouteType.ROLE)));
+                    ListRouteProvider.getRoute(RouteType.ROLE), null));
             }
         for (Role role : roles) {
             parameters.add(new ViewField(role.getName(), Integer.toString(role.getId()),
                     true, true, null, false, true, false,
-                    ListRouteProvider.getRoute(RouteType.ROLE)));
+                    ListRouteProvider.getRoute(RouteType.ROLE), null));
         }
         IActionProvider userActionProvider = ActionProviderContainer.getUserActionProvider();
         Action show = userActionProvider.getActionShow(userIdStr, "", null, null, false);

@@ -2,6 +2,7 @@ package controller;
 
 import models.repositories.RepositoryProvider;
 import services.RequestService;
+import services.ValidatorService;
 import view.ViewModel;
 
 public class RequestController extends AbstractController {
@@ -21,6 +22,12 @@ public class RequestController extends AbstractController {
     }
 
     public ViewModel update(ViewModel viewModel) {
+        String validationResult = validator.validate(viewModel);
+        if (!validationResult.isEmpty()) {
+            viewModel.setErrorMessage(validationResult);
+            return viewModel;
+        }
+
         int userId = permissionService.getUserIdFromToken(userToken);
         ViewModel vm = requestService.update(viewModel, userId);
         vm.setUserToken(userToken);

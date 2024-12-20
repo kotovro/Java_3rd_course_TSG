@@ -16,7 +16,7 @@ public class Request {
     private int requestId = -1;
     private RequestType type = RequestType.SINGLE_PERSON;
     private RequestState state = RequestState.STARTED;
-    private String description;
+    private String description = "";
     private int authorId = -1;
     private int residentId = -1;
     private Date time = Date.from(ZonedDateTime.now().toInstant());

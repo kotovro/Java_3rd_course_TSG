@@ -15,6 +15,7 @@ import services.actionProviders.ActionProviderContainer;
 import services.actionProviders.IActionProvider;
 import services.actionProviders.PaginationActionProvider;
 import view.Action;
+import view.ValidationTypes;
 import view.ViewField;
 import view.ViewModel;
 
@@ -65,11 +66,16 @@ public class RequestService  {
 
         List<ViewField> parameters = requestMdlView.getParameters();
         parameters.add(new ViewField("Request Id", requestIdStr, false, false));
-        parameters.add(new ViewField("Description", request.getDescription(), true, true));
+
+        ViewField description = new ViewField("Description", request.getDescription(), true, true);
+        description.getValidators().add(ValidationTypes.STRING_NOT_EMPTY);
+        parameters.add(description);
+
         parameters.add(new ViewField("Author Id", Integer.toString(request.getAuthorId()), false, false));
         parameters.add(new ViewField("Author", authorName, false, true));
 
         ViewField resident = new ViewField("Resident Id", Integer.toString(request.getResidentId()), true, false);
+        resident.getValidators().add(ValidationTypes.INT_NOT_NEGATIVE);
         parameters.add(resident);
         parameters.add(new ViewField("Resident", residentName, false, true, resident, true, ListRouteProvider.getRoute(RouteType.RESIDENT)));
 

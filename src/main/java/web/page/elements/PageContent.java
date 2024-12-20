@@ -15,4 +15,6 @@ public class PageContent {
     private List<WebMultiSelect> multipleSelects = new LinkedList<>();
     @Setter
     private PaginationInfo paginationInfo = null;
+    @Setter
+    private String errorMessage = "";
 }

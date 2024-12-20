@@ -53,7 +53,7 @@ public class RoleServlet extends HttpServlet {
                 String error = getRoleUpdateResult(req);
                 if (!error.isEmpty()) {
                     out.println(error);
-                    resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                    resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 }
                 break;
             }
