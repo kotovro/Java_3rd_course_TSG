@@ -54,7 +54,10 @@ public class UserServlet extends HttpServlet {
             {
                 String error = getUserUpdateResult(req);
                 if (!error.isEmpty()) {
-                    out.println(error);
+                    PageContent pc = new PageContent();
+                    pc.setErrorMessage(error);
+                    out.println(WebUtils.stringifyContent(pc));
+                    resp.setContentType("application/json");
                     resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 }
                 break;
@@ -211,6 +214,10 @@ public class UserServlet extends HttpServlet {
                     false, true, null, false, true, false,
                     "", null));
             isUserChanged = true;
+        }
+
+        if (!isUserChanged) {
+            return "Nothing changed";
         }
 
         Action update = vm.getActionsList().stream()

@@ -22,6 +22,12 @@ public class UserController extends AbstractController{
     }
 
     public ViewModel update(ViewModel viewModel) {
+        String validationResult = validator.validate(viewModel);
+        if (!validationResult.isEmpty()) {
+            viewModel.setErrorMessage(validationResult);
+            return viewModel;
+        }
+
         ViewModel vm = userService.update(viewModel);
         vm.setUserToken(userToken);
         return permissionService.applyPermissions(vm);

@@ -10,7 +10,8 @@ public enum ValidationTypes {
     INT_NOT_NEGATIVE("Value should not be negative"),
     STRING_VALID_INTEGER("Value is not valid integer"),
     USER_EXISTS("User not exist"),
-    LOGIN_NOT_UNIQUE("This login name is already occupied");
+    LOGIN_IS_UNIQUE("This login name is already occupied"),
+    ROLE_IS_UNIQUE("Role with such name already exists");
 
     @Getter
     private final String errorMessage;

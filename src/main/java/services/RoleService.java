@@ -8,11 +8,10 @@ import services.actionProviders.ActionProviderContainer;
 import services.actionProviders.IActionProvider;
 import services.actionProviders.PaginationActionProvider;
 import view.Action;
+import view.ValidationTypes;
 import view.ViewField;
 import view.ViewModel;
 
-import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
@@ -54,7 +53,11 @@ public class RoleService {
         List<ViewField> parameters = vm.getParameters();
         parameters.add(new ViewField("Role Id", roleIdStr, false, false));
         parameters.add(new ViewField("Permissions\n", "", false, false));
-        parameters.add(new ViewField("Role name", role.getName(), true, true));
+
+        ViewField roleName = new ViewField("Role name", role.getName(), true, true);
+        roleName.getValidators().add(ValidationTypes.STRING_NOT_EMPTY);
+        roleName.getValidators().add(ValidationTypes.ROLE_IS_UNIQUE);
+        parameters.add(roleName);
 
         int roleCount = roleRep.getUserRolesCount(roleId);
         parameters.add(new ViewField("Users with role", Integer.toString(roleCount), false, true));

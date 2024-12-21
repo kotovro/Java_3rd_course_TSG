@@ -61,6 +61,11 @@ public class ValidatorService {
                     valid = true;
                     break;
                 }
+                case ROLE_IS_UNIQUE:
+                {
+                    valid = true;
+                    break;
+                }
             }
             if (!valid) {
                 return validationType.getErrorMessage();

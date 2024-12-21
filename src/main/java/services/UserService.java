@@ -4,25 +4,12 @@ import models.entities.*;
 import models.repositories.RepositoryProvider;
 import lombok.Setter;
 import models.repositories.interfaces.IRequestRepository;
-import models.repositories.interfaces.IResidentRepository;
-import models.repositories.interfaces.IStaffMemberRepository;
 import models.repositories.interfaces.IUserRepository;
 import services.actionProviders.ActionProviderContainer;
 import services.actionProviders.IActionProvider;
 import services.actionProviders.PaginationActionProvider;
-import services.actionProviders.RoleActionProvider;
-import view.Action;
-import view.PaginationControls;
-import view.ViewField;
-import view.ViewModel;
+import view.*;
 
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
-import javax.swing.text.View;
-import java.security.SecureRandom;
-import java.security.spec.KeySpec;
-import java.util.Base64;
-import java.util.LinkedList;
 import java.util.List;
 
 public class UserService {
@@ -63,8 +50,15 @@ public class UserService {
 
         List<ViewField> parameters = vm.getParameters();
         parameters.add(new ViewField("User Id", userIdStr, false, true));
-        parameters.add(new ViewField("Login", user.getLogin(),userId < 0, true));
-        parameters.add(new ViewField("Password", "", userId < 0, userId < 0));
+
+        ViewField login = new ViewField("Login", user.getLogin(),userId < 0, true);
+        login.getValidators().add(ValidationTypes.STRING_NOT_EMPTY);
+        login.getValidators().add(ValidationTypes.LOGIN_IS_UNIQUE);
+        parameters.add(login);
+
+        ViewField password = new ViewField("Password", "", userId < 0, userId < 0);
+        password.getValidators().add(ValidationTypes.STRING_NOT_EMPTY);
+        parameters.add(password);
 
         IRequestRepository requestRep = repositoryProvider.getRequestRepository();
         parameters.add(new ViewField(

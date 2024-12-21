@@ -14,7 +14,7 @@ import java.util.List;
 @EqualsAndHashCode
 public class User {
     private int userId = -1;
-    private String login;
+    private String login = "";
     private String password;
     private boolean active = true;
     private byte[] passwordSalt = new byte[16];

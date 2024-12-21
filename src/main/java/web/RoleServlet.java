@@ -51,8 +51,13 @@ public class RoleServlet extends HttpServlet {
             }
             case "/update": {
                 String error = getRoleUpdateResult(req);
-                if (!error.isEmpty()) {
-                    out.println(error);
+
+                if (error != null && !error.isEmpty())
+                {
+                    resp.setContentType("application/json");
+                    PageContent pageContent = new PageContent();
+                    pageContent.setErrorMessage(error);
+                    out.println(WebUtils.stringifyContent(pageContent));
                     resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 }
                 break;
@@ -90,12 +95,7 @@ public class RoleServlet extends HttpServlet {
         pageContent.getSelects().addAll(getPartHTMLSelect(token, viewModel));
         pageContent.getButtons().addAll(getPartHTMLButtons(token, viewModel));
 
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-            return mapper.writeValueAsString(pageContent);
-        } catch (Exception e) {
-            return "";
-        }
+        return WebUtils.stringifyContent(pageContent);
     }
 
     private static List<WebSelect> getPartHTMLSelect(String token, ViewModel viewModel) {
